@@ -267,12 +267,31 @@ function imagenActividad(?string $imagen): ?string
             type="button"
             aria-label="Abrir menú"
             aria-expanded="false"
+            aria-controls="mobile-nav"
         >
             <span></span>
             <span></span>
         </button>
 
     </div>
+
+    <nav
+        class="mobile-nav"
+        id="mobile-nav"
+        aria-label="Navegación móvil"
+    >
+        <div class="container mobile-nav-inner">
+
+            <a href="#actividades">
+                Actividades
+            </a>
+
+            <a href="#" class="nav-access">
+                Acceso
+            </a>
+
+        </div>
+    </nav>
 </header>
 
 

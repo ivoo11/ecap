@@ -139,6 +139,68 @@ textarea {
     background: var(--ink);
 }
 
+/* MOBILE NAV */
+
+.mobile-nav {
+    display: grid;
+    grid-template-rows: 0fr;
+
+    overflow: hidden;
+
+    background: rgba(255, 255, 255, 0.98);
+
+    border-top: 1px solid transparent;
+
+    transition:
+        grid-template-rows 240ms cubic-bezier(.2, .7, .2, 1),
+        border-color 180ms ease;
+}
+
+.mobile-nav.is-open {
+    grid-template-rows: 1fr;
+    border-top-color: var(--border);
+}
+
+.mobile-nav-inner {
+    min-height: 0;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-nav a {
+    padding: 20px 0;
+
+    border-bottom: 1px solid var(--border);
+
+    color: var(--ink);
+
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.mobile-nav a:last-child {
+    border-bottom: 0;
+}
+
+
+/* HAMBURGER → X */
+
+.menu-button span {
+    transition:
+        transform 200ms ease,
+        opacity 160ms ease;
+}
+
+.menu-button[aria-expanded="true"] span:first-child {
+    transform: translateY(3.5px) rotate(45deg);
+}
+
+.menu-button[aria-expanded="true"] span:last-child {
+    transform: translateY(-3.5px) rotate(-45deg);
+}
+
 
 /* =========================================================
    HERO
@@ -619,6 +681,10 @@ textarea {
 
     .menu-button {
         display: none;
+    }
+
+    .mobile-nav {
+    display: none;
     }
 
     .desktop-nav {
