@@ -91,7 +91,16 @@ $sql = "
         e.fecha_inicio,
         e.fecha_fin,
         e.modalidad,
-        e.estado
+        e.estado,
+        e.cupo_maximo,
+
+        (
+            SELECT COUNT(*)
+            FROM inscripciones i
+            WHERE
+                i.edicion_id = e.id
+                AND i.estado = 'confirmada'
+        ) AS inscriptos_confirmados 
 
     FROM actividades a
 
@@ -122,6 +131,21 @@ if (!$actividad) {
     http_response_code(404);
     exit('Actividad no encontrada.');
 }
+
+/* =========================================================
+   CUPO
+   ========================================================= */
+
+$cupoMaximo = $actividad['cupo_maximo'] !== null
+    ? (int) $actividad['cupo_maximo']
+    : null;
+
+$inscriptosConfirmados =
+    (int) $actividad['inscriptos_confirmados'];
+
+$hayCupo =
+    $cupoMaximo === null ||
+    $inscriptosConfirmados < $cupoMaximo;
 
 
 /* =========================================================
@@ -346,7 +370,10 @@ if (!empty($actividad['imagen_portada'])) {
         </div>
 
 
-        <?php if ($actividad['estado'] === 'inscripcion_abierta'): ?>
+        <?php if (
+            $actividad['estado'] === 'inscripcion_abierta' &&
+            $hayCupo
+        ): ?>
 
             <a
                 href="../inscripcion/?edicion=<?= (int) $actividad['edicion_id'] ?>"
@@ -354,6 +381,15 @@ if (!empty($actividad['imagen_portada'])) {
             >
                 Inscribirme
             </a>
+
+        <?php elseif (!$hayCupo || $actividad['estado'] === 'cupo_completo'): ?>
+
+            <span
+                class="primary-action primary-action-disabled"
+                aria-disabled="true"
+            >
+                Cupo completo
+            </span>
 
         <?php endif; ?>
 

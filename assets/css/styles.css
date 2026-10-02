@@ -1036,6 +1036,12 @@ textarea {
     outline-offset: 3px;
 }
 
+.primary-action-disabled {
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
+}
+
 /* =========================================================
    DESKTOP
    ========================================================= */
