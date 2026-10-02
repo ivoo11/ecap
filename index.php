@@ -214,7 +214,7 @@ function imagenActividad(?string $imagen): ?string
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>ECAP</title>
+    <title>ECAP | Escuela de Capacitación de la Abogacía Pública</title>
 
     <meta
         name="description"
