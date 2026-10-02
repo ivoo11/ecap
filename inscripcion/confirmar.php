@@ -23,8 +23,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $edicionId = (int) ($_POST['edicion_id'] ?? 0);
 
-$nombre = trim((string) ($_POST['nombre'] ?? ''));
-$apellido = trim((string) ($_POST['apellido'] ?? ''));
+$nombre = mb_convert_case(
+    mb_strtolower(
+        trim((string) ($_POST['nombre'] ?? '')),
+        'UTF-8'
+    ),
+    MB_CASE_TITLE,
+    'UTF-8'
+);
+
+$apellido = mb_convert_case(
+    mb_strtolower(
+        trim((string) ($_POST['apellido'] ?? '')),
+        'UTF-8'
+    ),
+    MB_CASE_TITLE,
+    'UTF-8'
+);
 
 $dni = preg_replace(
     '/\D/',
