@@ -36,9 +36,43 @@ $email = strtolower(
     trim((string) ($_POST['email'] ?? ''))
 );
 
-$telefono = trim(
+$telefono = preg_replace(
+    '/\D/',
+    '',
     (string) ($_POST['telefono'] ?? '')
 );
+
+/*
+ * Normalización de teléfonos argentinos.
+ *
+ * Guardamos:
+ * código de área + número
+ *
+ * Ejemplo:
+ * +54 11 15 3200-8363
+ * 011 15 3200-8363
+ * 11 3200 8363
+ *
+ * Todos terminan como:
+ * 1132008363
+ */
+
+// Quitar código de país 54
+if (str_starts_with($telefono, '54')) {
+    $telefono = substr($telefono, 2);
+}
+
+// Quitar 0 inicial del código de área
+if (str_starts_with($telefono, '0')) {
+    $telefono = substr($telefono, 1);
+}
+
+/*
+ * El "15" argentino es más complicado porque depende
+ * del código de área. Por ahora NO conviene eliminar
+ * cualquier 15 automáticamente: podríamos modificar
+ * números válidos.
+ */
 
 $universidadId = (int) (
     $_POST['universidad_id'] ?? 0
@@ -74,7 +108,8 @@ if (
     strlen($dni) < 7 ||
     strlen($dni) > 8 ||
     !filter_var($email, FILTER_VALIDATE_EMAIL) ||
-    $telefono === ''
+    strlen($telefono) < 10 ||
+    strlen($telefono) > 11
 ) {
     http_response_code(422);
     exit('Completá correctamente todos los datos obligatorios.');

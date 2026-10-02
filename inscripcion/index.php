@@ -601,8 +601,14 @@ $volverUrl =
                                 name="telefono"
                                 value="<?= e($telefono) ?>"
                                 autocomplete="tel"
+                                inputmode="numeric"
+                                placeholder="Ej. 11 3200 8363"
                                 required
                             >
+
+                            <small class="field-help">
+                                Ingresá código de área + número, sin 0, sin 15 y sin +54.
+                            </small>
 
                         </div>
 
