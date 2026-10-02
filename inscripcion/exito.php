@@ -43,7 +43,7 @@ if (!$edicion) {
 
 
 $actividadUrl =
-    '../actividades/' .
+    '../actividades/?slug=' .
     rawurlencode((string) $edicion['slug']);
 
 ?>
