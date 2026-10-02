@@ -2,13 +2,29 @@
 
 declare(strict_types=1);
 
-$dbHost = 'localhost';
-$dbPort = '8888';
-$dbName = 'ecap';
-$dbUser = 'root';
-$dbPass = 'root';
+$isLocal = in_array(
+    $_SERVER['SERVER_NAME'] ?? '',
+    ['localhost', '127.0.0.1'],
+    true
+);
 
-$dsn = "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4";
+$configFile = $isLocal
+    ? __DIR__ . '/database.local.php'
+    : __DIR__ . '/database.production.php';
+
+if (!is_file($configFile)) {
+    http_response_code(500);
+    exit('Configuración de base de datos no disponible.');
+}
+
+$config = require $configFile;
+
+$dsn = sprintf(
+    'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
+    $config['host'],
+    $config['port'],
+    $config['name']
+);
 
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -17,13 +33,26 @@ $options = [
 ];
 
 try {
-    $pdo = new PDO($dsn, $dbUser, $dbPass, $options);
+
+    $pdo = new PDO(
+        $dsn,
+        $config['user'],
+        $config['pass'],
+        $options
+    );
+
 } catch (PDOException $e) {
+
     http_response_code(500);
 
-    if ($_SERVER['SERVER_NAME'] === 'localhost') {
+    if ($isLocal) {
         exit('Error DB: ' . $e->getMessage());
     }
+
+    error_log(
+        'Error de conexión DB ECAP: ' .
+        $e->getMessage()
+    );
 
     exit('No se pudo conectar con la base de datos.');
 }

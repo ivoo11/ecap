@@ -1,0 +1,13 @@
+# Configuración privada
+/app/config/database.local.php
+/app/config/database.production.php
+
+# Sistema
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
