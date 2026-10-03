@@ -326,7 +326,7 @@ function imagenActividad(?string $imagen): ?string
 
     <link
         rel="stylesheet"
-        href="assets/css/styles.css"
+        href="assets/css/styles.css?v=<?= filemtime(__DIR__ . '/assets/css/styles.css') ?>"
     >
 </head>
 
