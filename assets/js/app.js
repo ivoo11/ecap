@@ -166,12 +166,18 @@ if (heroSlides.length > 1 && heroDots.length === heroSlides.length) {
 
     if (hero) {
 
+        let touchStartY = 0;
+
         hero.addEventListener(
             "touchstart",
             (event) => {
 
-                touchStartX =
-                    event.changedTouches[0].clientX;
+                if (!event.touches.length) {
+                    return;
+                }
+
+                touchStartX = event.touches[0].clientX;
+                touchStartY = event.touches[0].clientY;
 
             },
             { passive: true }
@@ -182,22 +188,43 @@ if (heroSlides.length > 1 && heroDots.length === heroSlides.length) {
             "touchend",
             (event) => {
 
+                if (!event.changedTouches.length) {
+                    return;
+                }
+
                 const touchEndX =
                     event.changedTouches[0].clientX;
 
-                const distance =
+                const touchEndY =
+                    event.changedTouches[0].clientY;
+
+                const distanceX =
                     touchEndX - touchStartX;
 
+                const distanceY =
+                    touchEndY - touchStartY;
 
-                if (Math.abs(distance) < 50) {
+
+                /*
+                * Ignoramos movimientos cortos
+                * y desplazamientos principalmente verticales.
+                */
+                if (
+                    Math.abs(distanceX) < 50 ||
+                    Math.abs(distanceX) <= Math.abs(distanceY)
+                ) {
                     return;
                 }
 
 
-                if (distance < 0) {
+                if (distanceX < 0) {
+
                     showSlide(currentSlide + 1);
+
                 } else {
+
                     showSlide(currentSlide - 1);
+
                 }
 
 

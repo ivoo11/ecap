@@ -142,29 +142,30 @@ textarea {
 /* MOBILE NAV */
 
 .mobile-nav {
-    display: grid;
-    grid-template-rows: 0fr;
-
+    max-height: 0;
     overflow: hidden;
 
     background: rgba(255, 255, 255, 0.98);
 
     border-top: 1px solid transparent;
 
+    opacity: 0;
+
     transition:
-        grid-template-rows 240ms cubic-bezier(.2, .7, .2, 1),
+        max-height 240ms cubic-bezier(.2, .7, .2, 1),
+        opacity 180ms ease,
         border-color 180ms ease;
 }
 
 .mobile-nav.is-open {
-    grid-template-rows: 1fr;
+    max-height: 180px;
+
+    opacity: 1;
+
     border-top-color: var(--border);
 }
 
 .mobile-nav-inner {
-    min-height: 0;
-    overflow: hidden;
-
     display: flex;
     flex-direction: column;
 }
@@ -216,6 +217,8 @@ textarea {
 
     background: var(--blue-dark);
     color: #fff;
+
+    touch-action: pan-y;
 }
 
 
