@@ -348,7 +348,11 @@ function imagenActividad(?string $imagen): ?string
 
         <nav class="desktop-nav" aria-label="Navegación principal">
             <a href="#actividades">Actividades</a>
-            <a href="#" class="nav-access">Acceso</a>
+
+            <a href="registro/" class="nav-join">
+                Sumate a ECAP
+                <span aria-hidden="true">→</span>
+            </a>
         </nav>
 
         <button
@@ -375,8 +379,9 @@ function imagenActividad(?string $imagen): ?string
                 Actividades
             </a>
 
-            <a href="#" class="nav-access">
-                Acceso
+            <a href="registro/" class="nav-join-mobile">
+                Sumate a ECAP
+                <span aria-hidden="true">→</span>
             </a>
 
         </div>
@@ -419,7 +424,7 @@ function imagenActividad(?string $imagen): ?string
                         </p>
 
                         <a href="registro" class="home-hero-action">
-                            Registrarme
+                            Quiero sumarme
                             <span aria-hidden="true">→</span>
                         </a>
 

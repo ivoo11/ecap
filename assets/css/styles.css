@@ -2634,3 +2634,64 @@ textarea {
     }
 
 }
+
+/* =========================================================
+   NAV · SUMATE A ECAP
+   ========================================================= */
+
+@media (min-width: 768px) {
+
+    .desktop-nav .nav-join {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+
+        padding: 12px 17px;
+
+        background: var(--blue);
+        color: #fff;
+
+        border-radius: 8px;
+
+        transition:
+            background-color 180ms ease,
+            transform 180ms ease;
+    }
+
+    .desktop-nav .nav-join::after {
+        display: none;
+    }
+
+    .desktop-nav .nav-join span {
+        transition: transform 180ms ease;
+    }
+
+    .desktop-nav .nav-join:hover {
+        background: var(--blue-dark);
+        transform: translateY(-1px);
+    }
+
+    .desktop-nav .nav-join:hover span {
+        transform: translateX(3px);
+    }
+}
+
+
+/* MOBILE */
+
+.mobile-nav .nav-join-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    font-weight: 600;
+}
+
+.mobile-nav .nav-join-mobile span {
+    font-size: 1.1rem;
+    transition: transform 180ms ease;
+}
+
+.mobile-nav .nav-join-mobile:hover span {
+    transform: translateX(3px);
+}
