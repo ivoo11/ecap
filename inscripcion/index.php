@@ -1193,8 +1193,14 @@ verificationForm.addEventListener(
 <script>
 
 /* =========================================================
-   UNIVERSIDAD SEARCH
+   ELEMENTOS DEL FORMULARIO
    ========================================================= */
+
+const registrationForm =
+    document.getElementById('registration-form');
+
+const formGlobalError =
+    document.getElementById('form-global-error');
 
 const universitySearch =
     document.getElementById('universidad-search');
@@ -1208,8 +1214,22 @@ const universityResults =
 const universitySelect =
     document.getElementById('universidad-select');
 
+const aceptaDatos =
+    document.querySelector(
+        'input[name="acepta_datos"]'
+    );
+
+const ambitos =
+    document.querySelectorAll(
+        'input[name="ambitos[]"]'
+    );
+
 let searchTimer = null;
 
+
+/* =========================================================
+   UNIVERSIDAD SEARCH
+   ========================================================= */
 
 universitySearch.addEventListener(
     'input',
@@ -1297,6 +1317,8 @@ universitySearch.addEventListener(
                                     universityResults.hidden = true;
                                     universityResults.innerHTML = '';
 
+                                    clearGlobalError();
+
                                 }
                             );
 
@@ -1308,6 +1330,7 @@ universitySearch.addEventListener(
 
 
                     universityResults.hidden = false;
+
 
                 } catch (error) {
 
@@ -1327,19 +1350,34 @@ universitySearch.addEventListener(
     }
 );
 
-universitySearch.addEventListener('blur', () => {
 
-    setTimeout(() => {
+/* =========================================================
+   UNIVERSIDAD · BLUR
+   ========================================================= */
 
-        if (!universityId.value) {
-            universitySearch.value = '';
-            universityResults.hidden = true;
-            universityResults.innerHTML = '';
-        }
+universitySearch.addEventListener(
+    'blur',
+    () => {
 
-    }, 150);
+        setTimeout(() => {
 
-});
+            if (!universityId.value) {
+
+                universitySearch.value = '';
+                universityResults.hidden = true;
+                universityResults.innerHTML = '';
+
+            }
+
+        }, 150);
+
+    }
+);
+
+
+/* =========================================================
+   CERRAR RESULTADOS AL HACER CLICK AFUERA
+   ========================================================= */
 
 document.addEventListener(
     'click',
@@ -1348,6 +1386,248 @@ document.addEventListener(
         if (!universitySelect.contains(event.target)) {
             universityResults.hidden = true;
         }
+
+    }
+);
+
+
+/* =========================================================
+   ERRORES DEL FORMULARIO
+   ========================================================= */
+
+function showGlobalError(message, element = null) {
+
+    formGlobalError.textContent = message;
+
+    formGlobalError.setAttribute(
+        'role',
+        'alert'
+    );
+
+
+    if (element) {
+
+        element.focus({
+            preventScroll: true
+        });
+
+        element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+
+    }
+}
+
+
+function clearGlobalError() {
+
+    formGlobalError.textContent = '';
+
+    formGlobalError.removeAttribute(
+        'role'
+    );
+
+}
+
+
+/* =========================================================
+   LIMPIAR ERROR AL CORREGIR
+   ========================================================= */
+
+registrationForm.querySelectorAll(
+    'input'
+).forEach(input => {
+
+    input.addEventListener(
+        'input',
+        clearGlobalError
+    );
+
+    input.addEventListener(
+        'change',
+        clearGlobalError
+    );
+
+});
+
+
+/* =========================================================
+   VALIDAR FORMULARIO ANTES DE ENVIAR
+   ========================================================= */
+
+registrationForm.addEventListener(
+    'submit',
+    event => {
+
+        clearGlobalError();
+
+
+        const nombre =
+            document.getElementById('nombre');
+
+        const apellido =
+            document.getElementById('apellido');
+
+        const email =
+            document.getElementById('email');
+
+        const telefono =
+            document.getElementById('telefono');
+
+
+        /* -------------------------------------------------
+           NOMBRE
+           ------------------------------------------------- */
+
+        if (!nombre.value.trim()) {
+
+            event.preventDefault();
+
+            showGlobalError(
+                'Ingresá tu nombre para continuar.',
+                nombre
+            );
+
+            return;
+        }
+
+
+        /* -------------------------------------------------
+           APELLIDO
+           ------------------------------------------------- */
+
+        if (!apellido.value.trim()) {
+
+            event.preventDefault();
+
+            showGlobalError(
+                'Ingresá tu apellido para continuar.',
+                apellido
+            );
+
+            return;
+        }
+
+
+        /* -------------------------------------------------
+           EMAIL
+           ------------------------------------------------- */
+
+        if (!email.value.trim()) {
+
+            event.preventDefault();
+
+            showGlobalError(
+                'Ingresá tu email para continuar.',
+                email
+            );
+
+            return;
+        }
+
+
+        if (!email.validity.valid) {
+
+            event.preventDefault();
+
+            showGlobalError(
+                'Ingresá un email válido.',
+                email
+            );
+
+            return;
+        }
+
+
+        /* -------------------------------------------------
+           TELÉFONO
+           ------------------------------------------------- */
+
+        const telefonoNumerico =
+            telefono.value.replace(/\D/g, '');
+
+
+        if (
+            telefonoNumerico.length < 10 ||
+            telefonoNumerico.length > 13
+        ) {
+
+            event.preventDefault();
+
+            showGlobalError(
+                'Ingresá un teléfono válido con código de área.',
+                telefono
+            );
+
+            return;
+        }
+
+
+        /* -------------------------------------------------
+           UNIVERSIDAD
+           ------------------------------------------------- */
+
+        if (!universityId.value) {
+
+            event.preventDefault();
+
+            showGlobalError(
+                'Buscá y seleccioná tu universidad del listado.',
+                universitySearch
+            );
+
+            return;
+        }
+
+
+        /* -------------------------------------------------
+           ÁMBITO PROFESIONAL
+           ------------------------------------------------- */
+
+        const tieneAmbito =
+            Array.from(ambitos).some(
+                checkbox => checkbox.checked
+            );
+
+
+        if (!tieneAmbito) {
+
+            event.preventDefault();
+
+            showGlobalError(
+                'Seleccioná al menos un ámbito profesional.',
+                ambitos[0] ?? null
+            );
+
+            return;
+        }
+
+
+        /* -------------------------------------------------
+           TRATAMIENTO DE DATOS
+           ------------------------------------------------- */
+
+        if (!aceptaDatos.checked) {
+
+            event.preventDefault();
+
+            showGlobalError(
+                'Para inscribirte, necesitás aceptar el tratamiento de tus datos.',
+                aceptaDatos
+            );
+
+            return;
+        }
+
+
+        /*
+         * Todo correcto.
+         *
+         * NO hacemos preventDefault().
+         * El formulario continúa normalmente
+         * hacia confirmar.php.
+         */
 
     }
 );
