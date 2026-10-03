@@ -221,6 +221,71 @@ try {
 
     $pdo->beginTransaction();
 
+    /* =====================================================
+       BLOQUEAR EDICIÓN Y REVALIDAR CUPO
+       ===================================================== */
+
+    $stmt = $pdo->prepare("
+        SELECT
+            id,
+            cupo_maximo,
+            estado
+        FROM ediciones
+        WHERE id = :id
+        LIMIT 1
+        FOR UPDATE
+    ");
+
+    $stmt->execute([
+        'id' => $edicionId
+    ]);
+
+    $edicionActual = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (
+        !$edicionActual ||
+        $edicionActual['estado'] !== 'inscripcion_abierta'
+    ) {
+        throw new RuntimeException(
+            'La inscripción ya no está disponible.'
+        );
+    }
+
+
+    $cupoMaximo = $edicionActual['cupo_maximo'] !== null
+        ? (int) $edicionActual['cupo_maximo']
+        : null;
+
+
+    if ($cupoMaximo !== null) {
+
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*)
+            FROM inscripciones
+            WHERE
+                edicion_id = :edicion_id
+                AND estado = 'confirmada'
+        ");
+
+        $stmt->execute([
+            'edicion_id' => $edicionId
+        ]);
+
+        $inscriptosConfirmados =
+            (int) $stmt->fetchColumn();
+
+
+        if ($inscriptosConfirmados >= $cupoMaximo) {
+
+            $pdo->rollBack();
+
+            http_response_code(409);
+
+            exit(
+                'La actividad alcanzó el cupo máximo.'
+            );
+        }
+    }
 
     /* =====================================================
        EVITAR PERSONA DUPLICADA
