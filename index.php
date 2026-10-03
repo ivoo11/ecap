@@ -418,7 +418,7 @@ function imagenActividad(?string $imagen): ?string
                             propuestas de capacitación.
                         </p>
 
-                        <a href="#" class="home-hero-action">
+                        <a href="registro" class="home-hero-action">
                             Registrarme
                             <span aria-hidden="true">→</span>
                         </a>

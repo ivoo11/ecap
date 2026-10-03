@@ -33,11 +33,46 @@ $dni = preg_replace(
 );
 
 $edicionId = (int) ($input['edicion_id'] ?? 0);
+$contexto = (string) ($input['contexto'] ?? 'inscripcion');
 
 
 if (
     strlen($dni) < 7 ||
-    strlen($dni) > 8 ||
+    strlen($dni) > 8
+) {
+
+    http_response_code(422);
+
+    echo json_encode([
+        'ok' => false,
+        'message' => 'DNI inválido.'
+    ]);
+
+    exit;
+}
+
+
+if (
+    !in_array(
+        $contexto,
+        ['inscripcion', 'registro'],
+        true
+    )
+) {
+
+    http_response_code(422);
+
+    echo json_encode([
+        'ok' => false,
+        'message' => 'Contexto inválido.'
+    ]);
+
+    exit;
+}
+
+
+if (
+    $contexto === 'inscripcion' &&
     $edicionId <= 0
 ) {
 
@@ -45,7 +80,7 @@ if (
 
     echo json_encode([
         'ok' => false,
-        'message' => 'Datos inválidos.'
+        'message' => 'Edición inválida.'
     ]);
 
     exit;
@@ -56,32 +91,34 @@ if (
    VERIFICAR EDICIÓN
    ========================================================= */
 
-$stmtEdicion = $pdo->prepare("
-    SELECT id
-    FROM ediciones
-    WHERE
-        id = :id
-        AND estado = 'inscripcion_abierta'
-    LIMIT 1
-");
+if ($contexto === 'inscripcion') {
 
-$stmtEdicion->execute([
-    'id' => $edicionId
-]);
+    $stmtEdicion = $pdo->prepare("
+        SELECT id
+        FROM ediciones
+        WHERE
+            id = :id
+            AND estado = 'inscripcion_abierta'
+        LIMIT 1
+    ");
 
-
-if (!$stmtEdicion->fetch()) {
-
-    http_response_code(404);
-
-    echo json_encode([
-        'ok' => false,
-        'message' => 'La inscripción no está disponible.'
+    $stmtEdicion->execute([
+        'id' => $edicionId
     ]);
 
-    exit;
-}
 
+    if (!$stmtEdicion->fetch()) {
+
+        http_response_code(404);
+
+        echo json_encode([
+            'ok' => false,
+            'message' => 'La inscripción no está disponible.'
+        ]);
+
+        exit;
+    }
+}
 
 /* =========================================================
    BUSCAR PERSONA
@@ -120,6 +157,20 @@ if (!$persona) {
     exit;
 }
 
+/* =========================================================
+   REGISTRO GENERAL · PERSONA YA EXISTENTE
+   ========================================================= */
+
+if ($contexto === 'registro') {
+
+    echo json_encode([
+        'ok' => true,
+        'existe' => true,
+        'estado' => 'ya_registrado'
+    ]);
+
+    exit;
+}
 
 /* =========================================================
    VERIFICAR SI YA ESTÁ INSCRIPTO
