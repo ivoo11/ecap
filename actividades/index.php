@@ -113,11 +113,43 @@ $sql = "
     WHERE
         a.slug = :slug
         AND a.estado = 'publicada'
-        AND e.estado NOT IN ('cancelada')
+        AND e.estado IN (
+            'proximamente',
+            'inscripcion_abierta',
+            'cupo_completo',
+            'inscripcion_cerrada',
+            'en_curso',
+            'finalizada'
+        )
 
-    ORDER BY e.fecha_inicio ASC
+        ORDER BY
+            CASE
+                WHEN e.estado = 'en_curso' THEN 1
+                WHEN e.estado = 'inscripcion_abierta' THEN 2
+                WHEN e.estado = 'proximamente' THEN 3
+                WHEN e.estado = 'cupo_completo' THEN 4
+                WHEN e.estado = 'inscripcion_cerrada' THEN 5
+                WHEN e.estado = 'finalizada' THEN 6
+                ELSE 7
+            END ASC,
 
-    LIMIT 1
+            CASE
+                WHEN e.estado IN (
+                    'en_curso',
+                    'inscripcion_abierta',
+                    'proximamente',
+                    'cupo_completo',
+                    'inscripcion_cerrada'
+                )
+                THEN e.fecha_inicio
+            END ASC,
+
+            CASE
+                WHEN e.estado = 'finalizada'
+                THEN e.fecha_inicio
+            END DESC
+
+        LIMIT 1
 ";
 
 $stmt = $pdo->prepare($sql);
@@ -382,13 +414,52 @@ if (!empty($actividad['imagen_portada'])) {
                 Inscribirme
             </a>
 
-        <?php elseif (!$hayCupo || $actividad['estado'] === 'cupo_completo'): ?>
+        <?php elseif (
+            !$hayCupo ||
+            $actividad['estado'] === 'cupo_completo'
+        ): ?>
 
             <span
                 class="primary-action primary-action-disabled"
                 aria-disabled="true"
             >
-                Cupo completo
+                Cupos agotados
+            </span>
+
+        <?php elseif ($actividad['estado'] === 'proximamente'): ?>
+
+            <span
+                class="primary-action primary-action-disabled"
+                aria-disabled="true"
+            >
+                Inscripciones próximamente
+            </span>
+
+        <?php elseif ($actividad['estado'] === 'inscripcion_cerrada'): ?>
+
+            <span
+                class="primary-action primary-action-disabled"
+                aria-disabled="true"
+            >
+                Inscripciones cerradas
+            </span>
+
+        <?php elseif ($actividad['estado'] === 'en_curso'): ?>
+
+            <span
+                class="primary-action primary-action-disabled"
+                aria-disabled="true"
+            >
+                Actividad en curso
+            </span>
+
+        <?php elseif ($actividad['estado'] === 'finalizada'): ?>
+
+            <span
+                class="primary-action primary-action-disabled"
+                aria-disabled="true"
+            >
+                Actividad finalizada
             </span>
 
         <?php endif; ?>

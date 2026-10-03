@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/app/config/database.php';
 
-
 /* =========================================================
    ACTIVIDAD DESTACADA
    ========================================================= */
@@ -54,7 +53,13 @@ $sqlDestacada = "
     WHERE
         a.estado = 'publicada'
         AND a.destacada = 1
-        AND e.estado NOT IN ('cancelada', 'finalizada')
+        AND e.estado IN (
+            'proximamente',
+            'inscripcion_abierta',
+            'cupo_completo',
+            'inscripcion_cerrada',
+            'en_curso'
+        )
 
     GROUP BY
         a.id,
@@ -99,6 +104,15 @@ $sql = "
         e.fecha_inicio,
         e.modalidad,
         e.estado,
+        e.cupo_maximo,
+
+        (
+            SELECT COUNT(*)
+            FROM inscripciones i
+            WHERE
+                i.edicion_id = e.id
+                AND i.estado = 'confirmada'
+        ) AS inscriptos_confirmados,
 
         GROUP_CONCAT(
             DISTINCT CONCAT_WS(
@@ -131,7 +145,13 @@ $sql = "
 
     WHERE
         a.estado = 'publicada'
-        AND e.estado NOT IN ('cancelada', 'finalizada')
+        AND e.estado IN (
+            'proximamente',
+            'inscripcion_abierta',
+            'cupo_completo',
+            'inscripcion_cerrada',
+            'en_curso'
+    )
 
     GROUP BY
         a.id,
@@ -153,6 +173,75 @@ $stmt->execute();
 
 $actividades = $stmt->fetchAll();
 
+/* =========================================================
+   ACTIVIDADES ANTERIORES
+   ========================================================= */
+
+$sqlAnteriores = "
+    SELECT
+        a.id,
+        a.titulo,
+        a.slug,
+        a.imagen_portada,
+
+        ta.nombre AS tipo,
+
+        e.id AS edicion_id,
+        e.fecha_inicio,
+        e.modalidad,
+        e.estado,
+
+        GROUP_CONCAT(
+            DISTINCT CONCAT_WS(
+                ' ',
+                NULLIF(TRIM(d.titulo_profesional), ''),
+                p.nombre,
+                p.apellido
+            )
+            ORDER BY p.apellido, p.nombre
+            SEPARATOR ' · '
+        ) AS docentes
+
+    FROM actividades a
+
+    INNER JOIN tipos_actividad ta
+        ON ta.id = a.tipo_actividad_id
+
+    INNER JOIN ediciones e
+        ON e.actividad_id = a.id
+
+    LEFT JOIN edicion_docentes ed
+        ON ed.edicion_id = e.id
+
+    LEFT JOIN docentes d
+        ON d.id = ed.docente_id
+        AND d.activo = 1
+
+    LEFT JOIN personas p
+        ON p.id = d.persona_id
+
+    WHERE
+        a.estado = 'publicada'
+        AND e.estado = 'finalizada'
+
+    GROUP BY
+        a.id,
+        a.titulo,
+        a.slug,
+        a.imagen_portada,
+        ta.nombre,
+        e.id,
+        e.fecha_inicio,
+        e.modalidad,
+        e.estado
+
+    ORDER BY e.fecha_inicio DESC
+";
+
+$stmtAnteriores = $pdo->prepare($sqlAnteriores);
+$stmtAnteriores->execute();
+
+$actividadesAnteriores = $stmtAnteriores->fetchAll();
 
 /* =========================================================
    HELPERS
@@ -297,25 +386,163 @@ function imagenActividad(?string $imagen): ?string
 
 <main>
 
-    <!-- HERO -->
+    <!-- HERO CAROUSEL -->
 
-    <section class="hero">
-        <div class="container hero-inner">
+    <section class="home-hero" aria-label="Destacados ECAP">
 
-            <div class="hero-copy">
+        <div class="home-hero-track">
 
-                <h1>
-                    Estamos construyendo la capacitación del futuro.
-                </h1>
+            <!-- SLIDE 1 · SUMATE -->
 
-                <p>
-                    Formación y actualización para los desafíos
-                    de la Abogacía Pública.
-                </p>
+            <article class="home-hero-slide is-active">
 
-            </div>
+                <div class="home-hero-bg home-hero-bg-join"></div>
+
+                <div class="home-hero-overlay"></div>
+
+                <div class="container home-hero-content">
+
+                    <div class="home-hero-copy">
+
+                        <p class="home-hero-eyebrow">
+                            Comunidad ECAP
+                        </p>
+
+                        <h1>
+                            Sumate a ECAP.
+                        </h1>
+
+                        <p class="home-hero-description">
+                            Registrate para recibir novedades, invitaciones
+                            a actividades y conocer nuestras próximas
+                            propuestas de capacitación.
+                        </p>
+
+                        <a href="#" class="home-hero-action">
+                            Registrarme
+                            <span aria-hidden="true">→</span>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <!-- SLIDE 2 · IDENTIDAD -->
+
+            <article class="home-hero-slide">
+
+                <div class="home-hero-bg home-hero-bg-future"></div>
+
+                <div class="home-hero-overlay"></div>
+
+                <div class="container home-hero-content">
+
+                    <div class="home-hero-copy">
+
+                        <p class="home-hero-eyebrow">
+                            ECAP
+                        </p>
+
+                        <h2>
+                            Estamos construyendo la capacitación del futuro.
+                        </h2>
+
+                        <p class="home-hero-description">
+                            Formación y actualización para los desafíos
+                            de la Abogacía Pública.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <!-- SLIDE 3 · ACTIVIDADES -->
+
+            <article class="home-hero-slide">
+
+                <div class="home-hero-bg home-hero-bg-activities"></div>
+
+                <div class="home-hero-overlay"></div>
+
+                <div class="container home-hero-content">
+
+                    <div class="home-hero-copy">
+
+                        <p class="home-hero-eyebrow">
+                            Actividades
+                        </p>
+
+                        <h2>
+                            Un espacio de encuentro, formación<br>y crecimiento.
+                        </h2>
+
+                        <p class="home-hero-description">
+                            Seminarios, encuentros y propuestas académicas
+                            para la Abogacía Pública.
+                        </p>
+
+                        <a href="#actividades" class="home-hero-action">
+                            Ver actividades
+                            <span aria-hidden="true">→</span>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </article>
 
         </div>
+
+        <!-- NAVEGACIÓN DESKTOP -->
+
+        <button
+            type="button"
+            class="home-hero-arrow home-hero-arrow-prev"
+            aria-label="Anterior"
+        >
+            <span aria-hidden="true">‹</span>
+        </button>
+
+        <button
+            type="button"
+            class="home-hero-arrow home-hero-arrow-next"
+            aria-label="Siguiente"
+        >
+            <span aria-hidden="true">›</span>
+        </button>
+
+        <div class="home-hero-controls">
+
+            <button
+                type="button"
+                class="home-hero-dot is-active"
+                aria-label="Ver Sumate a ECAP"
+                aria-current="true"
+            ></button>
+
+            <button
+                type="button"
+                class="home-hero-dot"
+                aria-label="Ver presentación de ECAP"
+                aria-current="false"
+            ></button>
+
+            <button
+                type="button"
+                class="home-hero-dot"
+                aria-label="Ver actividades"
+                aria-current="false"
+            ></button>
+
+        </div>
+
     </section>
 
 
@@ -427,6 +654,7 @@ function imagenActividad(?string $imagen): ?string
                     <?php foreach ($actividades as $actividad): ?>
 
                         <?php
+
                             $fecha = fechaActividad(
                                 $actividad['fecha_inicio']
                             );
@@ -434,6 +662,59 @@ function imagenActividad(?string $imagen): ?string
                             $imagen = imagenActividad(
                                 $actividad['imagen_portada']
                             );
+
+
+                            /* ESTADO PÚBLICO DE LA EDICIÓN */
+
+                            $estadoEdicion = $actividad['estado'];
+
+                            $cupoMaximo = $actividad['cupo_maximo'] !== null
+                                ? (int) $actividad['cupo_maximo']
+                                : null;
+
+                            $inscriptosConfirmados =
+                                (int) $actividad['inscriptos_confirmados'];
+
+                            $hayCupo =
+                                $cupoMaximo === null ||
+                                $inscriptosConfirmados < $cupoMaximo;
+
+
+                            if (
+                                !$hayCupo ||
+                                $estadoEdicion === 'cupo_completo'
+                            ) {
+
+                                $estadoPublico = 'CUPOS AGOTADOS';
+                                $estadoClase = 'is-full';
+
+                            } elseif ($estadoEdicion === 'proximamente') {
+
+                                $estadoPublico = 'INSCRIPCIONES PRÓXIMAMENTE';
+                                $estadoClase = 'is-soon';
+
+                            } elseif ($estadoEdicion === 'inscripcion_abierta') {
+
+                                $estadoPublico = 'INSCRIPCIONES ABIERTAS';
+                                $estadoClase = 'is-open';
+
+                            } elseif ($estadoEdicion === 'inscripcion_cerrada') {
+
+                                $estadoPublico = 'INSCRIPCIONES CERRADAS';
+                                $estadoClase = 'is-closed';
+
+                            } elseif ($estadoEdicion === 'en_curso') {
+
+                                $estadoPublico = 'ACTIVIDAD EN CURSO';
+                                $estadoClase = 'is-running';
+
+                            } else {
+
+                                $estadoPublico = '';
+                                $estadoClase = '';
+
+                            }
+
                         ?>
 
                         <article class="activity-item">
@@ -490,6 +771,14 @@ function imagenActividad(?string $imagen): ?string
 
                                     <?php endif; ?>
 
+                                    <?php if ($estadoPublico !== ''): ?>
+
+                                        <p class="activity-status <?= htmlspecialchars($estadoClase) ?>">
+                                            <?= htmlspecialchars($estadoPublico) ?>
+                                        </p>
+
+                                    <?php endif; ?>
+
                                     <p>
                                         <?= htmlspecialchars($actividad['tipo']) ?>
                                         ·
@@ -529,6 +818,131 @@ function imagenActividad(?string $imagen): ?string
 
     </section>
 
+        <?php if (!empty($actividadesAnteriores)): ?>
+
+            <!-- ACTIVIDADES ANTERIORES -->
+
+            <section class="past-activities-section">
+
+                <div class="container">
+
+                    <div class="section-heading past-activities-heading">
+                        <h2>Actividades anteriores</h2>
+                    </div>
+
+                    <div class="past-activities-grid">
+
+                        <?php foreach ($actividadesAnteriores as $actividadAnterior): ?>
+
+                            <?php
+                                $fechaAnterior = fechaActividad(
+                                    $actividadAnterior['fecha_inicio']
+                                );
+
+                                $imagenAnterior = imagenActividad(
+                                    $actividadAnterior['imagen_portada']
+                                );
+                            ?>
+
+                            <article class="activity-item activity-item-past">
+
+                                <div class="activity-image">
+
+                                    <?php if ($imagenAnterior): ?>
+
+                                        <img
+                                            src="<?= htmlspecialchars($imagenAnterior) ?>"
+                                            alt=""
+                                        >
+
+                                    <?php else: ?>
+
+                                        <div class="activity-image-fallback"></div>
+
+                                    <?php endif; ?>
+
+
+                                    <div class="activity-date-overlay">
+
+                                        <span class="fallback-day">
+                                            <?= htmlspecialchars($fechaAnterior['dia']) ?>
+                                        </span>
+
+                                        <span class="fallback-month">
+                                            <?= htmlspecialchars(
+                                                strtoupper(
+                                                    substr(
+                                                        $fechaAnterior['mes'],
+                                                        0,
+                                                        3
+                                                    )
+                                                )
+                                            ) ?>
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="activity-copy">
+
+                                    <h3>
+                                        <?= htmlspecialchars(
+                                            $actividadAnterior['titulo']
+                                        ) ?>
+                                    </h3>
+
+                                    <?php if (!empty($actividadAnterior['docentes'])): ?>
+
+                                        <p class="activity-teacher">
+                                            <?= htmlspecialchars(
+                                                $actividadAnterior['docentes']
+                                            ) ?>
+                                        </p>
+
+                                    <?php endif; ?>
+
+                                    <p>
+                                        <?= htmlspecialchars(
+                                            $actividadAnterior['tipo']
+                                        ) ?>
+                                        ·
+                                        <?= htmlspecialchars(
+                                            modalidadLabel(
+                                                $actividadAnterior['modalidad']
+                                            )
+                                        ) ?>
+                                    </p>
+
+                                    <p>
+                                        <?= htmlspecialchars(
+                                            $fechaAnterior['dia']
+                                        ) ?>
+                                        de
+                                        <?= htmlspecialchars(
+                                            $fechaAnterior['mes']
+                                        ) ?>
+                                        ·
+                                        <?= htmlspecialchars(
+                                            $fechaAnterior['hora']
+                                        ) ?>
+                                        hs
+                                    </p>
+
+                                </div>
+
+                            </article>
+
+                        <?php endforeach; ?>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        <?php endif; ?>
 
     <!-- INSTITUCIONAL -->
 

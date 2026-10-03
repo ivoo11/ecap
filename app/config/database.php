@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+date_default_timezone_set('America/Argentina/Buenos_Aires');
+
 $isLocal = in_array(
     $_SERVER['SERVER_NAME'] ?? '',
     ['localhost', '127.0.0.1'],
@@ -40,6 +42,8 @@ try {
         $config['pass'],
         $options
     );
+
+    $pdo->exec("SET time_zone = '-03:00'");
 
 } catch (PDOException $e) {
 

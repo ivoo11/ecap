@@ -638,12 +638,8 @@ $volverUrl =
                                 <input
                                     type="text"
                                     id="universidad-search"
-                                    value="<?= e(
-                                        $universidadNombre !== ''
-                                            ? $universidadNombre
-                                            : $universidadOtra
-                                    ) ?>"
-                                    placeholder="Ej. Universidad de Buenos Aires"
+                                    value="<?= e($universidadNombre) ?>"
+                                    placeholder="Buscar universidad..."
                                     autocomplete="off"
                                     required
                                 >
@@ -655,13 +651,6 @@ $volverUrl =
                                 id="universidad_id"
                                 name="universidad_id"
                                 value="<?= $universidadId ?? '' ?>"
-                            >
-
-                            <input
-                                type="hidden"
-                                id="universidad_otra"
-                                name="universidad_otra"
-                                value="<?= e($universidadOtra) ?>"
                             >
 
                             <div
@@ -1213,9 +1202,6 @@ const universitySearch =
 const universityId =
     document.getElementById('universidad_id');
 
-const universityOther =
-    document.getElementById('universidad_otra');
-
 const universityResults =
     document.getElementById('universidad-results');
 
@@ -1232,7 +1218,6 @@ universitySearch.addEventListener(
         const query = this.value.trim();
 
         universityId.value = '';
-        universityOther.value = query;
 
         clearTimeout(searchTimer);
 
@@ -1309,8 +1294,6 @@ universitySearch.addEventListener(
                                     universityId.value =
                                         universidad.id;
 
-                                    universityOther.value = '';
-
                                     universityResults.hidden = true;
                                     universityResults.innerHTML = '';
 
@@ -1344,6 +1327,19 @@ universitySearch.addEventListener(
     }
 );
 
+universitySearch.addEventListener('blur', () => {
+
+    setTimeout(() => {
+
+        if (!universityId.value) {
+            universitySearch.value = '';
+            universityResults.hidden = true;
+            universityResults.innerHTML = '';
+        }
+
+    }, 150);
+
+});
 
 document.addEventListener(
     'click',

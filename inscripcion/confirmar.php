@@ -93,10 +93,6 @@ $universidadId = (int) (
     $_POST['universidad_id'] ?? 0
 );
 
-$universidadOtra = trim(
-    (string) ($_POST['universidad_otra'] ?? '')
-);
-
 $ambitos = $_POST['ambitos'] ?? [];
 
 $aceptaDatos =
@@ -168,43 +164,34 @@ if (!$stmt->fetch()) {
 
 
 /* =========================================================
-   NORMALIZAR UNIVERSIDAD
+   VALIDAR UNIVERSIDAD
    ========================================================= */
 
-$universidadIdFinal = null;
-$universidadOtraFinal = null;
-
-if ($universidadId > 0) {
-
-    $stmt = $pdo->prepare("
-        SELECT id
-        FROM universidades
-        WHERE
-            id = :id
-            AND activa = 1
-        LIMIT 1
-    ");
-
-    $stmt->execute([
-        'id' => $universidadId
-    ]);
-
-    if (!$stmt->fetch()) {
-        http_response_code(422);
-        exit('La universidad seleccionada no es válida.');
-    }
-
-    $universidadIdFinal = $universidadId;
-
-} elseif ($universidadOtra !== '') {
-
-    $universidadOtraFinal = $universidadOtra;
-
-} else {
-
+if ($universidadId <= 0) {
     http_response_code(422);
-    exit('Indicá tu universidad de graduación.');
+    exit('Seleccioná una universidad del listado.');
 }
+
+$stmt = $pdo->prepare("
+    SELECT id
+    FROM universidades
+    WHERE
+        id = :id
+        AND activa = 1
+    LIMIT 1
+");
+
+$stmt->execute([
+    'id' => $universidadId
+]);
+
+if (!$stmt->fetch()) {
+    http_response_code(422);
+    exit('La universidad seleccionada no es válida.');
+}
+
+$universidadIdFinal = $universidadId;
+$universidadOtraFinal = null;
 
 
 /* =========================================================
