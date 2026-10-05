@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-$isLocal = in_array(
-    $_SERVER['SERVER_NAME'] ?? '',
-    ['localhost', '127.0.0.1'],
-    true
-);
+$entorno = getenv('ECAP_ENV');
+
+$isLocal =
+    $entorno === 'local'
+    ||
+    in_array(
+        $_SERVER['SERVER_NAME'] ?? '',
+        ['localhost', '127.0.0.1'],
+        true
+    );
 
 $configFile = $isLocal
     ? __DIR__ . '/database.local.php'

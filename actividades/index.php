@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../app/config/database.php';
+require_once __DIR__ . '/../app/services/EstadoEdiciones.php';
 
 
 /* =========================================================
@@ -596,7 +597,7 @@ if (!empty($actividad['imagen_portada'])) {
 </footer>
 
 
-<script src="../assets/js/app.js"></script>
+<script src="../assets/js/app.js?v=<?= filemtime(__DIR__ . '/../assets/js/app.js') ?>"></script>
 
 </body>
 

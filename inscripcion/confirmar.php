@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../app/config/database.php';
+require_once __DIR__ . '/../app/services/EstadoEdiciones.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../app/services/MailService.php';
 
