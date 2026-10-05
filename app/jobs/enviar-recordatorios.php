@@ -136,28 +136,66 @@ if (
 if ($esRun) {
     $horaActual = date('H:i');
 
-    $ventanasPermitidas = [
-        ['07:00', '07:09'],
-        ['07:15', '07:24'],
-        ['07:30', '07:39'],
-    ];
+    /*
+     * Cada ventana define cuántos intentos como máximo
+     * puede haber realizado una comunicación hasta ese momento.
+     *
+     * 07:00 → hasta 1 intento
+     * 07:15 → hasta 2 intentos
+     * 07:30 → hasta 3 intentos
+     *
+     * Esto permite recuperarnos si una ejecución anterior
+     * del cron no ocurrió.
+     */
+    $intentosPermitidos = null;
 
-    $horarioPermitido = false;
-
-    foreach ($ventanasPermitidas as [$desde, $hasta]) {
-        if ($horaActual >= $desde && $horaActual <= $hasta) {
-            $horarioPermitido = true;
-            break;
-        }
+    if ($horaActual >= '07:00' && $horaActual <= '07:09') {
+        $intentosPermitidos = 1;
+    } elseif ($horaActual >= '07:15' && $horaActual <= '07:24') {
+        $intentosPermitidos = 2;
+    } elseif ($horaActual >= '07:30' && $horaActual <= '07:39') {
+        $intentosPermitidos = 3;
     }
 
-    if (!$horarioPermitido) {
+    if ($intentosPermitidos === null) {
         exit(
             "ERROR: --run sólo puede ejecutarse en las " .
             "ventanas autorizadas de recordatorios " .
             "(07:00, 07:15 y 07:30, hora Argentina).\n"
         );
     }
+
+    /*
+     * Lock global del job.
+     *
+     * Evita que dos procesos --run puedan procesar
+     * recordatorios simultáneamente.
+     */
+    $stmtLock = $pdo->query(
+        "SELECT GET_LOCK('ecap_recordatorios_clase', 0)"
+    );
+
+    $lockObtenido = (int) $stmtLock->fetchColumn();
+
+    if ($lockObtenido !== 1) {
+        exit(
+            "OMITIDO: ya existe otro proceso de " .
+            "recordatorios en ejecución.\n"
+        );
+    }
+
+    register_shutdown_function(
+        static function () use ($pdo): void {
+            try {
+                $pdo->query(
+                    "SELECT RELEASE_LOCK('ecap_recordatorios_clase')"
+                );
+            } catch (Throwable $e) {
+                // No hacemos nada: la conexión MySQL
+                // también libera el lock al cerrarse.
+            }
+        }
+    );
 }
 
 $inicioDia = $fechaTrabajo . ' 00:00:00';
@@ -373,6 +411,34 @@ foreach ($clases as $clase) {
             "para inscripción " .
             $destinatario['inscripcion_id'] .
             "\n";
+
+        continue;
+    }
+
+        /*
+    * En modo real respetamos el número máximo de intentos
+    * habilitado para la ventana actual.
+    *
+    * Ejemplos:
+    * - 07:00, si ya tiene 1 intento → no hacemos otro.
+    * - 07:15, si ya tiene 2 intentos → no hacemos otro.
+    * - 07:30, si ya tiene 3 intentos → no hacemos otro.
+    *
+    * Si un cron anterior no corrió, la siguiente ventana
+    * todavía puede recuperar el envío.
+    */
+    if (
+        $esRun &&
+        $intentosRealizados >= $intentosPermitidos
+    ) {
+        $registradosClase++;
+        $totalYaRegistrados++;
+
+        echo
+            "  · OMITIDO: ya alcanzó los intentos permitidos " .
+            "para esta ventana (inscripción " .
+            $destinatario['inscripcion_id'] .
+            ")\n";
 
         continue;
     }
