@@ -1,0 +1,2751 @@
+/* ==========================================================================
+   ECAP Admin — Design System
+   ========================================================================== */
+
+:root {
+    --ecap-blue: #101D30;
+    --ecap-blue-soft: #18283f;
+
+    --admin-bg: #f5f6f8;
+    --admin-surface: #ffffff;
+    --admin-surface-soft: #f8f9fb;
+
+    --admin-text: #101D30;
+    --admin-text-secondary: #667085;
+    --admin-text-muted: #98a2b3;
+
+    --admin-border: #e7e9ee;
+    --admin-border-strong: #d8dce3;
+
+    --admin-sidebar-width: 248px;
+    --admin-topbar-height: 68px;
+
+    --admin-radius-sm: 8px;
+    --admin-radius: 12px;
+    --admin-radius-lg: 18px;
+
+    --admin-shadow:
+        0 1px 2px rgba(16, 29, 48, 0.03),
+        0 8px 30px rgba(16, 29, 48, 0.04);
+
+    --admin-transition: 180ms ease;
+}
+
+
+/* ==========================================================================
+   Reset
+   ========================================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+    background: var(--admin-bg);
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--admin-bg);
+    color: var(--admin-text);
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button,
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+
+/* ==========================================================================
+   Shell
+   ========================================================================== */
+
+.admin-shell {
+    min-height: 100vh;
+}
+
+.admin-main {
+    min-height: 100vh;
+    margin-left: var(--admin-sidebar-width);
+}
+
+
+/* ==========================================================================
+   Sidebar
+   ========================================================================== */
+
+.admin-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 100;
+
+    display: flex;
+    flex-direction: column;
+
+    width: var(--admin-sidebar-width);
+    height: 100vh;
+
+    padding: 26px 18px 20px;
+
+    background: var(--ecap-blue);
+    color: #ffffff;
+}
+
+.admin-sidebar__brand {
+    display: flex;
+    align-items: center;
+
+    min-height: 54px;
+    padding: 0 10px 30px;
+}
+
+.admin-sidebar__brand a {
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+}
+
+.admin-sidebar__logo {
+    display: block;
+
+    width: 100%;
+    height: auto;
+    max-width: none;
+
+    object-fit: contain;
+}
+
+/* ==========================================================================
+   Navigation
+   ========================================================================== */
+
+.admin-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.admin-nav__item {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    min-height: 44px;
+    padding: 0 12px;
+
+    border-radius: var(--admin-radius-sm);
+
+    color: rgba(255, 255, 255, 0.66);
+
+    font-size: 16px;
+    font-weight: 500;
+
+    transition:
+        background var(--admin-transition),
+        color var(--admin-transition);
+}
+
+.admin-nav__item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+}
+
+.admin-nav__item.is-active {
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+}
+
+.admin-nav__item.is-active::before {
+    content: "";
+
+    position: absolute;
+    left: 0;
+
+    width: 3px;
+    height: 18px;
+
+    border-radius: 0 3px 3px 0;
+
+    background: #ffffff;
+}
+
+
+/* ==========================================================================
+   Sidebar footer
+   ========================================================================== */
+
+.admin-sidebar__footer {
+    margin-top: auto;
+    padding-top: 20px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.admin-sidebar__user {
+    display: flex;
+    flex-direction: column;
+
+    padding: 0 10px 16px;
+}
+
+.admin-sidebar__user strong {
+    overflow: hidden;
+
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.admin-sidebar__user span {
+    margin-top: 3px;
+
+    color: rgba(255, 255, 255, 0.48);
+
+    font-size: 13px;
+}
+
+.admin-sidebar__footer form {
+    margin: 0;
+}
+
+.admin-logout {
+    width: 100%;
+    min-height: 40px;
+
+    padding: 0 10px;
+
+    border: 0;
+    border-radius: var(--admin-radius-sm);
+
+    background: transparent;
+    color: rgba(255, 255, 255, 0.62);
+
+    font-size: 14px;
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background var(--admin-transition),
+        color var(--admin-transition);
+}
+
+.admin-logout:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+}
+
+
+/* ==========================================================================
+   Topbar
+   ========================================================================== */
+
+.admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+
+    display: flex;
+    align-items: center;
+
+    height: var(--admin-topbar-height);
+    padding: 0 38px;
+
+    border-bottom: 1px solid var(--admin-border);
+
+    background: rgba(255, 255, 255, 0.94);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.admin-topbar__context {
+    color: var(--admin-text-secondary);
+
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.admin-topbar__identity {
+    margin-left: auto;
+
+    color: var(--admin-text-muted);
+
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   Mobile menu button
+   ========================================================================== */
+
+.admin-menu-toggle {
+    display: none;
+
+    width: 40px;
+    height: 40px;
+
+    margin-right: 12px;
+    padding: 10px;
+
+    border: 0;
+    border-radius: var(--admin-radius-sm);
+
+    background: transparent;
+
+    cursor: pointer;
+}
+
+.admin-menu-toggle span {
+    display: block;
+
+    width: 20px;
+    height: 1.5px;
+
+    margin: 4px 0;
+
+    background: var(--admin-text);
+
+    transition: transform var(--admin-transition);
+}
+
+
+/* ==========================================================================
+   Content
+   ========================================================================== */
+
+.admin-content {
+    width: 100%;
+    padding: 42px 38px 64px;
+}
+
+.admin-page {
+    width: 100%;
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.admin-page__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+
+    margin-bottom: 34px;
+}
+
+.admin-page__header h1 {
+    margin: 0;
+
+    color: var(--admin-text);
+
+    font-size: clamp(28px, 3vw, 38px);
+    font-weight: 650;
+    line-height: 1.08;
+    letter-spacing: -0.045em;
+}
+
+.admin-page__header p {
+    max-width: 650px;
+
+    margin: 10px 0 0;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+
+/* ==========================================================================
+   Dashboard
+   ========================================================================== */
+
+.admin-dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.admin-dashboard__card {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 190px;
+    padding: 26px;
+
+    overflow: hidden;
+
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+
+    background: var(--admin-surface);
+    box-shadow: var(--admin-shadow);
+
+    transition:
+        transform var(--admin-transition),
+        border-color var(--admin-transition),
+        box-shadow var(--admin-transition);
+}
+
+.admin-dashboard__card:hover {
+    transform: translateY(-2px);
+
+    border-color: var(--admin-border-strong);
+
+    box-shadow:
+        0 2px 4px rgba(16, 29, 48, 0.03),
+        0 14px 36px rgba(16, 29, 48, 0.07);
+}
+
+.admin-dashboard__label {
+    margin-bottom: 28px;
+
+    color: var(--admin-text-muted);
+
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.admin-dashboard__card strong {
+    margin-top: auto;
+
+    color: var(--admin-text);
+
+    font-size: 18px;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+}
+
+.admin-dashboard__card p {
+    margin: 8px 0 0;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+
+/* ==========================================================================
+   Generic surfaces
+   ========================================================================== */
+
+.admin-card {
+    padding: 24px;
+
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+
+    background: var(--admin-surface);
+}
+
+.admin-divider {
+    width: 100%;
+    height: 1px;
+
+    margin: 24px 0;
+
+    border: 0;
+
+    background: var(--admin-border);
+}
+
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.admin-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 42px;
+    padding: 0 16px;
+
+    border: 1px solid transparent;
+    border-radius: var(--admin-radius-sm);
+
+    background: var(--ecap-blue);
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        opacity var(--admin-transition),
+        background var(--admin-transition),
+        border-color var(--admin-transition);
+}
+
+.admin-button:hover {
+    opacity: 0.92;
+}
+
+.admin-button--secondary {
+    border-color: var(--admin-border-strong);
+
+    background: var(--admin-surface);
+    color: var(--admin-text);
+}
+
+.admin-button--secondary:hover {
+    background: var(--admin-surface-soft);
+    opacity: 1;
+}
+
+
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+
+.admin-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.admin-field label {
+    color: var(--admin-text);
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.admin-input,
+.admin-select,
+.admin-textarea {
+    width: 100%;
+
+    border: 1px solid var(--admin-border-strong);
+    border-radius: var(--admin-radius-sm);
+
+    outline: none;
+
+    background: var(--admin-surface);
+    color: var(--admin-text);
+
+    transition:
+        border-color var(--admin-transition),
+        box-shadow var(--admin-transition);
+}
+
+.admin-input,
+.admin-select {
+    min-height: 44px;
+    padding: 0 13px;
+}
+
+.admin-textarea {
+    min-height: 130px;
+    padding: 12px 13px;
+
+    resize: vertical;
+}
+
+.admin-input:focus,
+.admin-select:focus,
+.admin-textarea:focus {
+    border-color: var(--ecap-blue);
+
+    box-shadow: 0 0 0 3px rgba(16, 29, 48, 0.07);
+}
+
+
+/* ==========================================================================
+   Tables
+   ========================================================================== */
+
+.admin-table-wrapper {
+    overflow-x: auto;
+
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+
+    background: var(--admin-surface);
+}
+
+.admin-table {
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 14px 16px;
+
+    border-bottom: 1px solid var(--admin-border);
+
+    text-align: left;
+    vertical-align: middle;
+}
+
+.admin-table th {
+    background: var(--admin-surface-soft);
+    color: var(--admin-text-secondary);
+
+    font-size: 13px;
+    font-weight: 650;
+    letter-spacing: 0.025em;
+}
+
+.admin-table td {
+    color: var(--admin-text);
+
+    font-size: 15px;
+}
+
+.admin-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+
+/* ==========================================================================
+   Sidebar overlay
+   ========================================================================== */
+
+.admin-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+
+    visibility: hidden;
+
+    background: rgba(16, 29, 48, 0.38);
+
+    opacity: 0;
+
+    transition:
+        opacity var(--admin-transition),
+        visibility var(--admin-transition);
+}
+
+/* ==========================================================================
+   Activity manager
+   ========================================================================== */
+
+.admin-table td strong {
+    font-weight: 600;
+}
+
+.admin-text-muted {
+    color: var(--admin-text-muted);
+}
+
+.admin-status {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 26px;
+    padding: 4px 9px;
+
+    border-radius: 999px;
+
+    background: rgba(16, 29, 48, 0.07);
+    color: var(--admin-text);
+
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.admin-status--muted {
+    color: var(--admin-text-secondary);
+}
+
+.admin-table__action {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right !important;
+}
+
+.admin-table__link {
+    color: var(--admin-text);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.admin-table__link:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   Activity Editor — ECAP Design System
+   ========================================================================== */
+
+.admin-page--editor {
+    max-width: 1080px;
+}
+
+
+/* ==========================================================================
+   Editor navigation
+   ========================================================================== */
+
+.activity-create-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    margin-bottom: 34px;
+}
+
+.activity-create-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+
+    transition: color var(--admin-transition);
+}
+
+.activity-create-back:hover {
+    color: var(--admin-text);
+}
+
+.activity-create-state {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 30px;
+    padding: 5px 11px;
+
+    border: 1px solid var(--admin-border);
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.65);
+    color: var(--admin-text-secondary);
+
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+
+/* ==========================================================================
+   Editor hero
+   ========================================================================== */
+
+.activity-create-hero {
+    margin-bottom: 42px;
+}
+
+.activity-create-hero h1 {
+    margin: 0 0 34px;
+
+    color: var(--admin-text);
+
+    font-size: clamp(38px, 4.4vw, 54px);
+    font-weight: 650;
+    line-height: 1.02;
+    letter-spacing: -0.05em;
+}
+
+
+/* ==========================================================================
+   Activity creation steps
+   ========================================================================== */
+
+.activity-steps {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+
+    width: 100%;
+
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.activity-step {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    padding: 0 0 17px;
+
+    color: var(--admin-text-muted);
+}
+
+.activity-step::after {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+
+    height: 2px;
+
+    background: transparent;
+
+    content: "";
+}
+
+.activity-step__number {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.activity-step__label {
+    font-size: 14px;
+    font-weight: 550;
+    line-height: 1.2;
+}
+
+.activity-step.is-active {
+    color: var(--admin-text);
+}
+
+.activity-step.is-active::after {
+    background: var(--ecap-blue);
+}
+
+
+/* ==========================================================================
+   Main editor surface
+   ========================================================================== */
+
+.activity-create-form {
+    width: 100%;
+}
+
+.activity-editor-surface {
+    width: 100%;
+    overflow: hidden;
+
+    border: 1px solid rgba(16, 29, 48, 0.08);
+    border-radius: 22px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 1px 2px rgba(16, 29, 48, 0.02),
+        0 18px 60px rgba(16, 29, 48, 0.055);
+}
+
+
+/* ==========================================================================
+   Surface heading
+   ========================================================================== */
+
+.activity-editor-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 32px;
+
+    padding: 36px 42px 32px;
+
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.activity-editor-heading h2 {
+    margin: 0;
+
+    color: var(--admin-text);
+
+    font-size: 24px;
+    font-weight: 650;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+}
+
+.activity-editor-heading p {
+    max-width: 520px;
+
+    margin: 9px 0 0;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.activity-editor-heading > span {
+    flex: 0 0 auto;
+
+    color: var(--admin-text-muted);
+
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+
+/* ==========================================================================
+   Editor body
+   ========================================================================== */
+
+.activity-editor-body {
+    display: flex;
+    flex-direction: column;
+    gap: 42px;
+
+    padding: 42px;
+}
+
+
+/* ==========================================================================
+   Activity type selector
+   ========================================================================== */
+
+.activity-type-field {
+    min-width: 0;
+
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+}
+
+.activity-type-field legend {
+    margin: 0 0 16px;
+    padding: 0;
+
+    color: var(--admin-text);
+
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.activity-type-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.activity-type-option {
+    position: relative;
+
+    display: block;
+
+    min-width: 0;
+
+    cursor: pointer;
+}
+
+.activity-type-option input {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    overflow: hidden;
+
+    opacity: 0;
+    pointer-events: none;
+}
+
+.activity-type-option span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 54px;
+    padding: 10px 14px;
+
+    border: 1px solid var(--admin-border-strong);
+    border-radius: 12px;
+
+    background: #ffffff;
+    color: var(--admin-text-secondary);
+
+    font-size: 14px;
+    font-weight: 550;
+    line-height: 1.3;
+    text-align: center;
+
+    transition:
+        border-color var(--admin-transition),
+        background var(--admin-transition),
+        color var(--admin-transition),
+        box-shadow var(--admin-transition),
+        transform var(--admin-transition);
+}
+
+.activity-type-option:hover span {
+    border-color: rgba(16, 29, 48, 0.35);
+
+    color: var(--admin-text);
+}
+
+.activity-type-option input:checked + span {
+    border-color: var(--ecap-blue);
+
+    background: var(--ecap-blue);
+    color: #ffffff;
+
+    box-shadow:
+        0 7px 18px rgba(16, 29, 48, 0.12);
+}
+
+.activity-type-option input:focus-visible + span {
+    outline: 3px solid rgba(16, 29, 48, 0.12);
+    outline-offset: 2px;
+}
+
+
+/* ==========================================================================
+   Editor fields
+   ========================================================================== */
+
+.activity-editor-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.activity-editor-field > label,
+.activity-editor-field__heading label {
+    color: var(--admin-text);
+
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.activity-editor-field__heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.activity-editor-field__heading span {
+    color: var(--admin-text-muted);
+
+    font-size: 12px;
+    font-weight: 450;
+}
+
+
+/* Inputs */
+
+.activity-editor-field input,
+.activity-editor-field textarea {
+    width: 100%;
+
+    border: 1px solid var(--admin-border-strong);
+    border-radius: 12px;
+
+    outline: none;
+
+    background: #fbfbfc;
+    color: var(--admin-text);
+
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.55;
+
+    transition:
+        border-color var(--admin-transition),
+        background var(--admin-transition),
+        box-shadow var(--admin-transition);
+}
+
+.activity-editor-field input {
+    height: 56px;
+    padding: 0 17px;
+}
+
+.activity-editor-field textarea {
+    min-height: 150px;
+    padding: 16px 17px;
+
+    resize: vertical;
+}
+
+.activity-editor-field input::placeholder,
+.activity-editor-field textarea::placeholder {
+    color: #a6acb6;
+
+    opacity: 1;
+}
+
+.activity-editor-field input:hover,
+.activity-editor-field textarea:hover {
+    border-color: #c7ccd4;
+}
+
+.activity-editor-field input:focus,
+.activity-editor-field textarea:focus {
+    border-color: var(--ecap-blue);
+
+    background: #ffffff;
+
+    box-shadow:
+        0 0 0 4px rgba(16, 29, 48, 0.06);
+}
+
+
+/* ==========================================================================
+   Editor actions
+   ========================================================================== */
+
+.activity-editor-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+
+    padding: 24px 42px;
+
+    border-top: 1px solid var(--admin-border);
+
+    background: #fbfbfc;
+}
+
+.activity-action-primary,
+.activity-action-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    min-height: 48px;
+    padding: 0 20px;
+
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+
+    transition:
+        background var(--admin-transition),
+        border-color var(--admin-transition),
+        color var(--admin-transition),
+        transform var(--admin-transition),
+        box-shadow var(--admin-transition);
+}
+
+.activity-action-primary {
+    border: 1px solid var(--ecap-blue);
+
+    background: var(--ecap-blue);
+    color: #ffffff;
+
+    cursor: pointer;
+}
+
+.activity-action-primary:hover {
+    transform: translateY(-1px);
+
+    background: var(--ecap-blue-soft);
+
+    box-shadow:
+        0 7px 20px rgba(16, 29, 48, 0.12);
+}
+
+.activity-action-primary:active {
+    transform: translateY(0);
+}
+
+.activity-action-secondary {
+    border: 1px solid transparent;
+
+    background: transparent;
+    color: var(--admin-text-secondary);
+}
+
+.activity-action-secondary:hover {
+    background: rgba(16, 29, 48, 0.045);
+    color: var(--admin-text);
+}
+
+
+/* ==========================================================================
+   Editor alerts
+   ========================================================================== */
+
+.admin-alert {
+    margin-bottom: 28px;
+    padding: 18px 20px;
+
+    border: 1px solid var(--admin-border-strong);
+    border-radius: 12px;
+
+    background: #ffffff;
+}
+
+.admin-alert strong {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: var(--admin-text);
+
+    font-size: 14px;
+    font-weight: 650;
+}
+
+.admin-alert ul {
+    margin: 0;
+    padding-left: 18px;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.admin-alert--error {
+    border-left: 3px solid var(--ecap-blue);
+}
+
+/* ==========================================================================
+   ACTIVITY WORKSPACE
+   Gestión de actividad + navegación por pasos
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   Layout
+   -------------------------------------------------------------------------- */
+
+.admin-page--workspace {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+}
+
+
+/* --------------------------------------------------------------------------
+   Back
+   -------------------------------------------------------------------------- */
+
+.activity-workspace-back {
+    margin-bottom: 34px;
+}
+
+.activity-workspace-back a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+
+    text-decoration: none;
+
+    transition: color var(--admin-transition);
+}
+
+.activity-workspace-back a:hover {
+    color: var(--admin-text);
+}
+
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+
+.activity-workspace-hero {
+    max-width: 900px;
+    margin-bottom: 42px;
+}
+
+.activity-workspace-type {
+    display: block;
+
+    margin-bottom: 12px;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 14px;
+    font-weight: 550;
+    line-height: 1.3;
+}
+
+.activity-workspace-hero h1 {
+    max-width: 900px;
+
+    margin: 0;
+
+    color: var(--admin-text);
+
+    font-size: clamp(36px, 4vw, 50px);
+    font-weight: 650;
+    line-height: 1.06;
+    letter-spacing: -0.045em;
+}
+
+
+/* --------------------------------------------------------------------------
+   Step navigation
+   -------------------------------------------------------------------------- */
+
+.activity-workspace-steps {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+
+    width: 100%;
+    margin-bottom: 54px;
+
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.activity-workspace-step {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    min-width: 0;
+    padding: 0 0 17px;
+
+    color: var(--admin-text-muted);
+
+    font-size: 14px;
+    font-weight: 550;
+    line-height: 1.2;
+
+    text-decoration: none;
+
+    transition: color var(--admin-transition);
+}
+
+.activity-workspace-step > span {
+    color: inherit;
+
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.activity-workspace-step::after {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+
+    height: 2px;
+
+    background: transparent;
+
+    content: "";
+
+    transition: background var(--admin-transition);
+}
+
+.activity-workspace-step:hover {
+    color: var(--admin-text);
+}
+
+.activity-workspace-step.is-active {
+    color: var(--admin-text);
+}
+
+.activity-workspace-step.is-active::after {
+    background: var(--ecap-blue);
+}
+
+
+/* --------------------------------------------------------------------------
+   Workspace content
+   -------------------------------------------------------------------------- */
+
+.activity-workspace-content {
+    width: 100%;
+    max-width: 920px;
+}
+
+.activity-workspace-content__header {
+    margin-bottom: 34px;
+}
+
+.activity-workspace-content__header h2 {
+    margin: 0;
+
+    color: var(--admin-text);
+
+    font-size: 30px;
+    font-weight: 650;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+}
+
+.activity-workspace-content__header p {
+    max-width: 620px;
+
+    margin: 10px 0 0;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+
+/* ==========================================================================
+   EDITION EDITOR
+   Paso 02
+   ========================================================================== */
+
+.activity-edition-form {
+    width: 100%;
+
+    border-top: 1px solid var(--admin-border);
+}
+
+
+/* --------------------------------------------------------------------------
+   Sections
+   -------------------------------------------------------------------------- */
+
+.activity-edition-section {
+    display: grid;
+    grid-template-columns: minmax(190px, 0.55fr) minmax(0, 1.45fr);
+    gap: 54px;
+
+    padding: 36px 0;
+
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.activity-edition-section__intro {
+    min-width: 0;
+}
+
+.activity-edition-section__intro h3 {
+    margin: 0;
+
+    color: var(--admin-text);
+
+    font-size: 17px;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+}
+
+.activity-edition-section__intro p {
+    max-width: 270px;
+
+    margin: 8px 0 0;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.activity-edition-fields {
+    min-width: 0;
+}
+
+.activity-edition-fields--two {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Fields
+   -------------------------------------------------------------------------- */
+
+.activity-edition-form .activity-editor-field {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+
+    min-width: 0;
+}
+
+.activity-edition-form .activity-editor-field label {
+    color: var(--admin-text);
+
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.activity-edition-form .activity-editor-field input {
+    width: 100%;
+    height: 56px;
+
+    padding: 0 15px;
+
+    border: 1px solid var(--admin-border-strong);
+    border-radius: 12px;
+
+    outline: none;
+
+    background: #fbfbfc;
+    color: var(--admin-text);
+
+    font: inherit;
+    font-size: 15px;
+
+    transition:
+        border-color var(--admin-transition),
+        background var(--admin-transition),
+        box-shadow var(--admin-transition);
+}
+
+.activity-edition-form .activity-editor-field input:hover {
+    border-color: rgba(16, 29, 48, 0.28);
+}
+
+.activity-edition-form .activity-editor-field input:focus {
+    border-color: var(--ecap-blue);
+
+    background: #fff;
+
+    box-shadow: 0 0 0 3px rgba(16, 29, 48, 0.08);
+}
+
+.activity-editor-field--compact {
+    width: 100%;
+    max-width: 220px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Modality selector
+   -------------------------------------------------------------------------- */
+
+.activity-mode-options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+
+    width: 100%;
+}
+
+.activity-mode-option {
+    position: relative;
+
+    min-width: 0;
+
+    cursor: pointer;
+}
+
+.activity-mode-option input {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+    pointer-events: none;
+}
+
+.activity-mode-option span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 56px;
+
+    padding: 10px 14px;
+
+    border: 1px solid var(--admin-border-strong);
+    border-radius: 12px;
+
+    background: #fff;
+    color: var(--admin-text-secondary);
+
+    font-size: 14px;
+    font-weight: 550;
+    line-height: 1.2;
+
+    text-align: center;
+
+    transition:
+        border-color var(--admin-transition),
+        background var(--admin-transition),
+        color var(--admin-transition),
+        box-shadow var(--admin-transition);
+}
+
+.activity-mode-option:hover span {
+    border-color: rgba(16, 29, 48, 0.35);
+
+    color: var(--admin-text);
+}
+
+.activity-mode-option input:checked + span {
+    border-color: var(--ecap-blue);
+
+    background: var(--ecap-blue);
+    color: #fff;
+
+    box-shadow: 0 6px 16px rgba(16, 29, 48, 0.10);
+}
+
+.activity-mode-option input:focus-visible + span {
+    outline: 3px solid rgba(16, 29, 48, 0.12);
+    outline-offset: 2px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Actions
+   -------------------------------------------------------------------------- */
+
+.activity-edition-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    padding-top: 30px;
+}
+
+.activity-edition-actions > span {
+    max-width: 440px;
+
+    color: var(--admin-text-muted);
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.activity-edition-actions .activity-action-primary {
+    flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   ACTIVITY WORKSPACE — TABLET
+   ========================================================================== */
+
+@media (max-width: 960px) {
+
+    .activity-workspace-hero {
+        margin-bottom: 38px;
+    }
+
+    .activity-workspace-steps {
+        margin-bottom: 46px;
+    }
+
+    .activity-edition-section {
+        grid-template-columns: minmax(160px, 0.5fr) minmax(0, 1.5fr);
+        gap: 36px;
+    }
+
+}
+
+
+/* ==========================================================================
+   ACTIVITY WORKSPACE — MOBILE
+   ========================================================================== */
+
+@media (max-width: 640px) {
+
+    /* Layout
+       ---------------------------------------------------------------------- */
+
+    .admin-page--workspace {
+        max-width: none;
+    }
+
+
+    /* Back
+       ---------------------------------------------------------------------- */
+
+    .activity-workspace-back {
+        margin-bottom: 26px;
+    }
+
+    .activity-workspace-back a {
+        font-size: 14px;
+    }
+
+
+    /* Hero
+       ---------------------------------------------------------------------- */
+
+    .activity-workspace-hero {
+        margin-bottom: 34px;
+    }
+
+    .activity-workspace-type {
+        margin-bottom: 10px;
+
+        font-size: 13px;
+    }
+
+    .activity-workspace-hero h1 {
+        font-size: 36px;
+        line-height: 1.08;
+        letter-spacing: -0.04em;
+    }
+
+
+    /* Step navigation
+       Horizontal scroll on mobile
+       ---------------------------------------------------------------------- */
+
+    .activity-workspace-steps {
+        display: flex;
+
+        width: auto;
+
+        margin-right: -16px;
+        margin-bottom: 40px;
+
+        padding-right: 16px;
+
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .activity-workspace-steps::-webkit-scrollbar {
+        display: none;
+    }
+
+    .activity-workspace-step {
+        flex: 0 0 112px;
+
+        padding-bottom: 15px;
+
+        font-size: 13px;
+    }
+
+    .activity-workspace-step > span {
+        font-size: 10px;
+    }
+
+
+    /* Content
+       ---------------------------------------------------------------------- */
+
+    .activity-workspace-content {
+        max-width: none;
+    }
+
+    .activity-workspace-content__header {
+        margin-bottom: 28px;
+    }
+
+    .activity-workspace-content__header h2 {
+        font-size: 27px;
+    }
+
+    .activity-workspace-content__header p {
+        margin-top: 8px;
+
+        font-size: 15px;
+        line-height: 1.55;
+    }
+
+
+    /* Edition sections
+       ---------------------------------------------------------------------- */
+
+    .activity-edition-section {
+        grid-template-columns: 1fr;
+        gap: 22px;
+
+        padding: 28px 0;
+    }
+
+    .activity-edition-section__intro h3 {
+        font-size: 17px;
+    }
+
+    .activity-edition-section__intro p {
+        max-width: none;
+
+        font-size: 13px;
+    }
+
+
+    /* Dates
+       ---------------------------------------------------------------------- */
+
+    .activity-edition-fields--two {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+
+    /* Inputs
+       ---------------------------------------------------------------------- */
+
+    .activity-edition-form .activity-editor-field input {
+        height: 54px;
+
+        font-size: 16px;
+    }
+
+    .activity-editor-field--compact {
+        max-width: none;
+    }
+
+
+    /* Modality
+       ---------------------------------------------------------------------- */
+
+    .activity-mode-options {
+        grid-template-columns: 1fr;
+        gap: 9px;
+    }
+
+    .activity-mode-option span {
+        min-height: 54px;
+
+        font-size: 14px;
+    }
+
+
+    /* Actions
+       ---------------------------------------------------------------------- */
+
+    .activity-edition-actions {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 18px;
+
+        padding-top: 26px;
+    }
+
+    .activity-edition-actions > span {
+        max-width: none;
+    }
+
+    .activity-edition-actions .activity-action-primary {
+        width: 100%;
+        justify-content: center;
+    }
+
+}
+
+/* ==========================================================================
+   ACTIVITY DETAIL
+   Ficha madre de la actividad
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   Layout
+   -------------------------------------------------------------------------- */
+
+.admin-page--activity-detail {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+}
+
+
+/* --------------------------------------------------------------------------
+   Back
+   -------------------------------------------------------------------------- */
+
+.activity-detail-back {
+    margin-bottom: 34px;
+}
+
+.activity-detail-back a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+
+    text-decoration: none;
+
+    transition: color var(--admin-transition);
+}
+
+.activity-detail-back a:hover {
+    color: var(--admin-text);
+}
+
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+
+.activity-detail-hero {
+    max-width: 900px;
+    margin-bottom: 42px;
+}
+
+.activity-detail-type {
+    display: block;
+
+    margin-bottom: 12px;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 14px;
+    font-weight: 550;
+    line-height: 1.3;
+}
+
+.activity-detail-hero h1 {
+    max-width: 900px;
+    margin: 0;
+
+    color: var(--admin-text);
+
+    font-size: clamp(36px, 4vw, 50px);
+    font-weight: 650;
+    line-height: 1.06;
+    letter-spacing: -0.045em;
+}
+
+
+/* --------------------------------------------------------------------------
+   Main navigation
+   -------------------------------------------------------------------------- */
+
+.activity-detail-nav {
+    display: flex;
+    align-items: flex-end;
+    gap: 36px;
+
+    width: 100%;
+    margin-bottom: 52px;
+
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.activity-detail-nav__item {
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 0 0 17px;
+
+    color: var(--admin-text-muted);
+
+    font-size: 15px;
+    font-weight: 550;
+    line-height: 1;
+
+    text-decoration: none;
+
+    transition: color var(--admin-transition);
+}
+
+.activity-detail-nav__item:hover {
+    color: var(--admin-text);
+}
+
+.activity-detail-nav__item::after {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+
+    height: 2px;
+
+    background: transparent;
+
+    content: "";
+}
+
+.activity-detail-nav__item.is-active {
+    color: var(--admin-text);
+}
+
+.activity-detail-nav__item.is-active::after {
+    background: var(--ecap-blue);
+}
+
+.activity-detail-nav__item > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 22px;
+    height: 22px;
+
+    padding: 0 7px;
+
+    border-radius: 999px;
+
+    background: #eef0f3;
+    color: var(--admin-text-secondary);
+
+    font-size: 11px;
+    font-weight: 650;
+}
+
+
+/* --------------------------------------------------------------------------
+   Section
+   -------------------------------------------------------------------------- */
+
+.activity-detail-section {
+    width: 100%;
+}
+
+.activity-detail-section__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+
+    margin-bottom: 34px;
+}
+
+.activity-detail-section__header > div {
+    min-width: 0;
+}
+
+.activity-detail-section__header h2 {
+    margin: 0;
+
+    color: var(--admin-text);
+
+    font-size: 30px;
+    font-weight: 650;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+}
+
+.activity-detail-section__header p {
+    max-width: 620px;
+
+    margin: 10px 0 0;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.activity-detail-section__header .activity-action-primary {
+    flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   GENERAL
+   ========================================================================== */
+
+.activity-general-data {
+    width: 100%;
+
+    border-top: 1px solid var(--admin-border);
+}
+
+.activity-general-row {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 42px;
+
+    padding: 27px 0;
+
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.activity-general-row__label {
+    color: var(--admin-text-secondary);
+
+    font-size: 13px;
+    font-weight: 550;
+    line-height: 1.5;
+}
+
+.activity-general-row strong {
+    color: var(--admin-text);
+
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.55;
+}
+
+.activity-general-row__content {
+    max-width: 760px;
+
+    color: var(--admin-text);
+
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.activity-general-empty {
+    color: var(--admin-text-muted);
+}
+
+
+/* ==========================================================================
+   EDITIONS LIST
+   ========================================================================== */
+
+.activity-editions-list {
+    width: 100%;
+
+    border-top: 1px solid var(--admin-border);
+}
+
+.activity-edition-row {
+    display: grid;
+    grid-template-columns:
+        minmax(150px, 0.8fr)
+        minmax(180px, 1fr)
+        minmax(180px, 0.8fr)
+        auto;
+
+    align-items: center;
+    gap: 30px;
+
+    min-height: 92px;
+    padding: 20px 0;
+
+    border-bottom: 1px solid var(--admin-border);
+
+    transition:
+        background var(--admin-transition),
+        padding var(--admin-transition);
+}
+
+.activity-edition-row__date span {
+    color: var(--admin-text);
+
+    font-size: 17px;
+    font-weight: 650;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+.activity-edition-row__main {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.activity-edition-row__main strong {
+    color: var(--admin-text);
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.activity-edition-row__main > span {
+    color: var(--admin-text-secondary);
+
+    font-size: 13px;
+}
+
+.activity-edition-row__status {
+    display: flex;
+    align-items: center;
+}
+
+.activity-edition-row__status > span {
+    color: var(--admin-text-secondary);
+
+    font-size: 13px;
+    font-weight: 550;
+}
+
+.activity-edition-row__action {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.activity-edition-row__action a {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    color: var(--admin-text);
+
+    font-size: 14px;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    transition:
+        gap var(--admin-transition),
+        color var(--admin-transition);
+}
+
+.activity-edition-row__action a:hover {
+    gap: 13px;
+}
+
+
+/* ==========================================================================
+   EMPTY EDITIONS
+   ========================================================================== */
+
+.activity-editions-empty {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 28px;
+
+    padding: 40px 0;
+
+    border-top: 1px solid var(--admin-border);
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.activity-editions-empty__number {
+    color: var(--admin-text-muted);
+
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.activity-editions-empty h3 {
+    margin: 0;
+
+    color: var(--admin-text);
+
+    font-size: 19px;
+    font-weight: 650;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+}
+
+.activity-editions-empty p {
+    max-width: 540px;
+
+    margin: 8px 0 20px;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.activity-editions-empty__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    color: var(--admin-text);
+
+    font-size: 14px;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    transition: gap var(--admin-transition);
+}
+
+.activity-editions-empty__action:hover {
+    gap: 13px;
+}
+
+
+/* ==========================================================================
+   ACTIVITY DETAIL — TABLET
+   ========================================================================== */
+
+@media (max-width: 960px) {
+
+    .activity-detail-hero {
+        margin-bottom: 38px;
+    }
+
+    .activity-detail-nav {
+        margin-bottom: 44px;
+    }
+
+    .activity-edition-row {
+        grid-template-columns:
+            minmax(130px, 0.8fr)
+            minmax(150px, 1fr)
+            minmax(150px, 0.8fr)
+            auto;
+
+        gap: 20px;
+    }
+
+}
+
+
+/* ==========================================================================
+   ACTIVITY DETAIL — MOBILE
+   ========================================================================== */
+
+@media (max-width: 640px) {
+
+    /* Layout
+       ---------------------------------------------------------------------- */
+
+    .admin-page--activity-detail {
+        max-width: none;
+    }
+
+
+    /* Back
+       ---------------------------------------------------------------------- */
+
+    .activity-detail-back {
+        margin-bottom: 26px;
+    }
+
+    .activity-detail-back a {
+        font-size: 14px;
+    }
+
+
+    /* Hero
+       ---------------------------------------------------------------------- */
+
+    .activity-detail-hero {
+        margin-bottom: 34px;
+    }
+
+    .activity-detail-type {
+        margin-bottom: 10px;
+
+        font-size: 13px;
+    }
+
+    .activity-detail-hero h1 {
+        font-size: 36px;
+        line-height: 1.08;
+        letter-spacing: -0.04em;
+    }
+
+
+    /* Navigation
+       ---------------------------------------------------------------------- */
+
+    .activity-detail-nav {
+        gap: 28px;
+
+        margin-bottom: 38px;
+    }
+
+    .activity-detail-nav__item {
+        padding-bottom: 15px;
+
+        font-size: 14px;
+    }
+
+
+    /* Section heading
+       ---------------------------------------------------------------------- */
+
+    .activity-detail-section__header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 22px;
+
+        margin-bottom: 28px;
+    }
+
+    .activity-detail-section__header h2 {
+        font-size: 27px;
+    }
+
+    .activity-detail-section__header p {
+        margin-top: 8px;
+
+        font-size: 15px;
+        line-height: 1.55;
+    }
+
+    .activity-detail-section__header .activity-action-primary {
+        width: 100%;
+        justify-content: center;
+    }
+
+
+    /* General
+       ---------------------------------------------------------------------- */
+
+    .activity-general-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+
+        padding: 22px 0;
+    }
+
+    .activity-general-row__label {
+        font-size: 12px;
+    }
+
+    .activity-general-row strong,
+    .activity-general-row__content {
+        font-size: 15px;
+    }
+
+
+    /* Editions
+       ---------------------------------------------------------------------- */
+
+    .activity-edition-row {
+        position: relative;
+
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 14px 20px;
+
+        min-height: 0;
+
+        padding: 24px 0;
+    }
+
+    .activity-edition-row__date {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .activity-edition-row__date span {
+        font-size: 17px;
+    }
+
+    .activity-edition-row__status {
+        grid-column: 2;
+        grid-row: 1;
+
+        justify-content: flex-end;
+    }
+
+    .activity-edition-row__main {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .activity-edition-row__action {
+        grid-column: 2;
+        grid-row: 2;
+
+        align-items: flex-end;
+        justify-content: flex-end;
+    }
+
+
+    /* Empty editions
+       ---------------------------------------------------------------------- */
+
+    .activity-editions-empty {
+        grid-template-columns: 1fr;
+        gap: 16px;
+
+        padding: 30px 0;
+    }
+
+    .activity-editions-empty__number {
+        font-size: 11px;
+    }
+
+    .activity-editions-empty h3 {
+        font-size: 18px;
+    }
+
+    .activity-editions-empty p {
+        margin-bottom: 18px;
+    }
+
+}
+
+
+/* ==========================================================================
+   ACTIVITY DETAIL — SMALL MOBILE
+   ========================================================================== */
+
+@media (max-width: 420px) {
+
+    .activity-detail-hero h1 {
+        font-size: 32px;
+    }
+
+    .activity-detail-nav {
+        gap: 24px;
+    }
+
+    .activity-edition-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+
+        padding: 24px 0;
+    }
+
+    .activity-edition-row__date,
+    .activity-edition-row__status,
+    .activity-edition-row__main,
+    .activity-edition-row__action {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .activity-edition-row__status,
+    .activity-edition-row__action {
+        justify-content: flex-start;
+    }
+
+    .activity-edition-row__status {
+        margin-top: 5px;
+    }
+
+    .activity-edition-row__action {
+        margin-top: 10px;
+    }
+
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 960px) {
+
+    .admin-main {
+        margin-left: 0;
+    }
+
+    .admin-sidebar {
+        transform: translateX(-100%);
+
+        box-shadow: 20px 0 50px rgba(16, 29, 48, 0.15);
+
+        transition: transform 220ms ease;
+    }
+
+    .admin-sidebar-open .admin-sidebar {
+        transform: translateX(0);
+    }
+
+    .admin-sidebar-open .admin-sidebar-overlay {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .admin-menu-toggle {
+        display: block;
+    }
+
+    .admin-topbar {
+        padding: 0 22px;
+    }
+
+    .admin-content {
+        padding: 32px 22px 54px;
+    }
+
+    .admin-dashboard {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .activity-type-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 640px) {
+
+    .admin-topbar {
+        height: 62px;
+        padding: 0 16px;
+    }
+
+    .admin-content {
+        padding: 28px 16px 44px;
+    }
+
+    .admin-page__header {
+        align-items: flex-start;
+        flex-direction: column;
+
+        margin-bottom: 26px;
+    }
+
+    .admin-page__header h1 {
+        font-size: 30px;
+    }
+
+    .admin-dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-dashboard__card {
+        min-height: 165px;
+        padding: 22px;
+    }
+
+    .admin-dashboard__label {
+        margin-bottom: 24px;
+    }
+
+    .admin-page__header .admin-button {
+    width: 100%;
+    }
+
+    .admin-table-wrapper {
+        margin-right: -16px;
+        margin-left: -16px;
+
+        border-right: 0;
+        border-left: 0;
+        border-radius: 0;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 13px 14px;
+    }
+
+    .activity-create-nav {
+    margin-bottom: 26px;
+    }
+
+    .activity-create-state {
+        font-size: 11px;
+    }
+
+    .activity-create-hero h1 {
+        margin-bottom: 28px;
+    }
+
+    .activity-steps {
+        display: flex;
+
+        margin-right: -16px;
+        padding-right: 16px;
+
+        overflow-x: auto;
+
+        scrollbar-width: none;
+        }
+
+        .activity-steps::-webkit-scrollbar {
+            display: none;
+        }
+
+        .activity-step {
+            flex: 0 0 108px;
+        }
+
+        .activity-step__label {
+            font-size: 13px;
+        }
+
+        .activity-editor-surface {
+            margin-right: -16px;
+            margin-left: -16px;
+
+            width: auto;
+
+            border-right: 0;
+            border-left: 0;
+            border-radius: 0;
+
+            box-shadow: none;
+        }
+
+        .activity-editor-heading {
+            padding: 28px 20px 26px;
+        }
+
+        .activity-editor-heading h2 {
+            font-size: 22px;
+        }
+
+        .activity-editor-heading > span {
+            display: none;
+        }
+
+        .activity-editor-body {
+            gap: 34px;
+
+            padding: 30px 20px;
+        }
+
+        .activity-type-options {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .activity-type-option span {
+            min-height: 52px;
+            padding: 9px 10px;
+        }
+
+        .activity-editor-field__heading {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .activity-editor-field input {
+            height: 54px;
+        }
+
+        .activity-editor-actions {
+            align-items: stretch;
+            flex-direction: column-reverse;
+
+            padding: 20px;
+        }
+
+        .activity-action-primary,
+        .activity-action-secondary {
+            width: 100%;
+        }
+
+}

@@ -5,7 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../app/config/database.php';
 require_once __DIR__ . '/../app/services/EstadoEdiciones.php';
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../app/services/MailService.php';
+require_once __DIR__ . '/../app/services/InscripcionService.php';
 
 
 /* =========================================================
@@ -504,48 +504,12 @@ try {
 
 try {
 
-    $stmt = $pdo->prepare("
-        SELECT
-            a.titulo,
-            e.fecha_inicio,
-            e.modalidad,
-            e.zoom_url,
-            e.zoom_meeting_id,
-            e.zoom_passcode
-        FROM ediciones e
-        INNER JOIN actividades a
-            ON a.id = e.actividad_id
-        WHERE e.id = :edicion_id
-        LIMIT 1
-    ");
+    $inscripcionService = new InscripcionService($pdo);
 
-    $stmt->execute([
-        'edicion_id' => $edicionId
-    ]);
-
-    $datosActividad = $stmt->fetch(PDO::FETCH_ASSOC);
-
-
-    if (!$datosActividad) {
-        throw new RuntimeException(
-            'No se encontraron los datos de la actividad.'
-        );
-    }
-
-
-    $mailService = new MailService();
-
-    $mailService->enviarConfirmacionInscripcion(
-        $email,
-        $nombre,
-        (string) $datosActividad['titulo'],
-        (string) $datosActividad['fecha_inicio'],
-        (string) $datosActividad['modalidad'],
-        (string) ($datosActividad['zoom_url'] ?? ''),
-        (string) ($datosActividad['zoom_meeting_id'] ?? ''),
-        (string) ($datosActividad['zoom_passcode'] ?? '')
+    $inscripcionService->enviarConfirmacion(
+        $personaId,
+        $edicionId
     );
-
 
 } catch (Throwable $e) {
 
