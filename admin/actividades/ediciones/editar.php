@@ -557,6 +557,7 @@ require __DIR__ . '/../../includes/header.php';
 
             </form>
 
+        </div>
 
             <?php if ($personaEncontrada): ?>
 
@@ -623,9 +624,6 @@ require __DIR__ . '/../../includes/header.php';
                 </div>
 
             <?php endif; ?>
-
-        </div>
-
 
         <div class="edition-students-list">
 
