@@ -3049,52 +3049,62 @@ a {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
+    gap: 32px;
 
+    width: 100%;
     max-width: 760px;
 
     margin-top: 20px;
-    padding: 18px 20px;
+    padding: 20px 22px;
 
     border: 1px solid var(--admin-border);
     border-radius: 14px;
 
-    background: var(--admin-surface-soft);
+    background: #ffffff;
 }
 
 .edition-person-result__identity {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
+    display: grid;
+    grid-template-columns: minmax(160px, 0.8fr) minmax(110px, 0.55fr) minmax(220px, 1.2fr);
+    align-items: center;
+    gap: 22px;
 
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.edition-person-result__identity strong,
+.edition-person-result__identity span {
     min-width: 0;
 }
 
 .edition-person-result__identity strong {
-    overflow: hidden;
-
     color: var(--admin-text);
 
     font-size: 15px;
     font-weight: 650;
     line-height: 1.35;
 
-    text-overflow: ellipsis;
+    white-space: normal;
 }
 
 .edition-person-result__identity span {
-    overflow: hidden;
-
     color: var(--admin-text-secondary);
 
     font-size: 13px;
     line-height: 1.45;
 
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .edition-person-result form {
     flex: 0 0 auto;
+    margin: 0;
+}
+
+.edition-person-result .activity-action-primary {
+    white-space: nowrap;
 }
 
 
@@ -3335,11 +3345,18 @@ a {
     .edition-person-result {
         align-items: stretch;
         flex-direction: column;
-        gap: 17px;
+        gap: 18px;
 
         max-width: none;
 
-        padding: 17px;
+        padding: 18px;
+    }
+
+    .edition-person-result__identity {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
     }
 
     .edition-person-result form,
