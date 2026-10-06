@@ -83,7 +83,7 @@ $dniBuscado = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    if (!Csrf::validate($_POST['csrf_token'] ?? null)) {
+    if (!Csrf::validate($_POST['_csrf'] ?? null)) {
         http_response_code(419);
         exit('La sesión del formulario venció. Recargá la página.');
     }
