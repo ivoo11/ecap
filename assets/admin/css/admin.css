@@ -2749,3 +2749,667 @@ a {
         }
 
 }
+
+/* ==========================================================================
+   EDITION ADMIN
+   Gestión de una edición / cursada
+   ========================================================================== */
+
+.admin-page--edition {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+}
+
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+
+.edition-admin-hero {
+    max-width: 920px;
+    margin-bottom: 40px;
+}
+
+.edition-admin-hero__type {
+    display: block;
+    margin-bottom: 11px;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 14px;
+    font-weight: 550;
+    line-height: 1.3;
+}
+
+.edition-admin-hero h1 {
+    max-width: 920px;
+    margin: 0;
+
+    color: var(--admin-text);
+
+    font-size: clamp(36px, 4vw, 50px);
+    font-weight: 650;
+    line-height: 1.06;
+    letter-spacing: -0.045em;
+}
+
+.edition-admin-hero__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+
+    margin-top: 18px;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 15px;
+    font-weight: 450;
+}
+
+
+/* --------------------------------------------------------------------------
+   Edition navigation
+   -------------------------------------------------------------------------- */
+
+.edition-admin-nav {
+    display: flex;
+    align-items: flex-end;
+    gap: 34px;
+
+    width: 100%;
+    margin-bottom: 50px;
+
+    overflow-x: auto;
+
+    border-bottom: 1px solid var(--admin-border);
+
+    scrollbar-width: none;
+}
+
+.edition-admin-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.edition-admin-nav__item {
+    position: relative;
+
+    flex: 0 0 auto;
+
+    padding: 0 0 17px;
+
+    color: var(--admin-text-muted);
+
+    font-size: 15px;
+    font-weight: 550;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.edition-admin-nav__item::after {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+
+    height: 2px;
+
+    background: transparent;
+
+    content: "";
+}
+
+.edition-admin-nav__item.is-active {
+    color: var(--admin-text);
+}
+
+.edition-admin-nav__item.is-active::after {
+    background: var(--ecap-blue);
+}
+
+
+/* --------------------------------------------------------------------------
+   Feedback
+   -------------------------------------------------------------------------- */
+
+.edition-message {
+    margin-bottom: 28px;
+    padding: 16px 18px;
+
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+
+    background: #ffffff;
+    color: var(--admin-text);
+
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.edition-message--success {
+    border-left: 3px solid var(--ecap-blue);
+}
+
+.edition-message--error {
+    border-left: 3px solid #a23b3b;
+}
+
+
+/* --------------------------------------------------------------------------
+   Students section
+   -------------------------------------------------------------------------- */
+
+.edition-students {
+    width: 100%;
+}
+
+.edition-students__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+
+    margin-bottom: 30px;
+}
+
+.edition-students__header h2 {
+    margin: 0;
+
+    color: var(--admin-text);
+
+    font-size: 30px;
+    font-weight: 650;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+}
+
+.edition-students__header p {
+    margin: 9px 0 0;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+
+/* --------------------------------------------------------------------------
+   Add student
+   -------------------------------------------------------------------------- */
+
+.edition-add-student {
+    display: grid;
+    grid-template-columns: minmax(210px, 0.65fr) minmax(0, 1.35fr);
+    gap: 52px;
+
+    margin-bottom: 46px;
+    padding: 32px 0;
+
+    border-top: 1px solid var(--admin-border);
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.edition-add-student__intro h3 {
+    margin: 0;
+
+    color: var(--admin-text);
+
+    font-size: 18px;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+}
+
+.edition-add-student__intro p {
+    max-width: 260px;
+
+    margin: 8px 0 0;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+
+/* --------------------------------------------------------------------------
+   DNI search
+   -------------------------------------------------------------------------- */
+
+.edition-student-search {
+    min-width: 0;
+}
+
+.edition-student-search > label {
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: var(--admin-text);
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.edition-student-search__controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+
+    max-width: 590px;
+}
+
+.edition-student-search input {
+    width: 100%;
+    height: 48px;
+    padding: 0 15px;
+
+    border: 1px solid var(--admin-border-strong);
+    border-radius: 10px;
+
+    outline: none;
+
+    background: #ffffff;
+    color: var(--admin-text);
+
+    font-family: inherit;
+    font-size: 16px;
+
+    transition:
+        border-color var(--admin-transition),
+        box-shadow var(--admin-transition);
+}
+
+.edition-student-search input::placeholder {
+    color: #a6acb6;
+}
+
+.edition-student-search input:hover {
+    border-color: rgba(16, 29, 48, 0.30);
+}
+
+.edition-student-search input:focus {
+    border-color: var(--ecap-blue);
+
+    box-shadow: 0 0 0 3px rgba(16, 29, 48, 0.07);
+}
+
+.edition-student-search .activity-action-primary {
+    min-height: 48px;
+    white-space: nowrap;
+}
+
+
+/* --------------------------------------------------------------------------
+   Person search result
+   -------------------------------------------------------------------------- */
+
+.edition-person-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    max-width: 760px;
+
+    margin-top: 20px;
+    padding: 18px 20px;
+
+    border: 1px solid var(--admin-border);
+    border-radius: 14px;
+
+    background: var(--admin-surface-soft);
+}
+
+.edition-person-result__identity {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    min-width: 0;
+}
+
+.edition-person-result__identity strong {
+    overflow: hidden;
+
+    color: var(--admin-text);
+
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1.35;
+
+    text-overflow: ellipsis;
+}
+
+.edition-person-result__identity span {
+    overflow: hidden;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 13px;
+    line-height: 1.45;
+
+    text-overflow: ellipsis;
+}
+
+.edition-person-result form {
+    flex: 0 0 auto;
+}
+
+
+/* --------------------------------------------------------------------------
+   Students list
+   -------------------------------------------------------------------------- */
+
+.edition-students-list {
+    width: 100%;
+
+    border-top: 1px solid var(--admin-border);
+}
+
+.edition-student-row {
+    display: grid;
+    grid-template-columns:
+        minmax(220px, 1.05fr)
+        minmax(260px, 1.35fr)
+        minmax(100px, auto);
+
+    align-items: center;
+    gap: 28px;
+
+    min-height: 76px;
+    padding: 17px 0;
+
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.edition-student-row__identity {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.edition-student-row__identity strong {
+    overflow: hidden;
+
+    color: var(--admin-text);
+
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edition-student-row__identity span {
+    color: var(--admin-text-secondary);
+
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.edition-student-row__email {
+    overflow: hidden;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 14px;
+    line-height: 1.4;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edition-student-row__status {
+    justify-self: end;
+
+    padding: 5px 10px;
+
+    border-radius: 999px;
+
+    background: rgba(16, 29, 48, 0.065);
+    color: var(--admin-text);
+
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+
+/* --------------------------------------------------------------------------
+   Empty state
+   -------------------------------------------------------------------------- */
+
+.edition-students-empty {
+    padding: 38px 0;
+
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.edition-students-empty strong {
+    color: var(--admin-text);
+
+    font-size: 16px;
+    font-weight: 650;
+}
+
+.edition-students-empty p {
+    margin: 7px 0 0;
+
+    color: var(--admin-text-secondary);
+
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+
+/* ==========================================================================
+   EDITION ADMIN — TABLET
+   ========================================================================== */
+
+@media (max-width: 960px) {
+
+    .edition-admin-hero {
+        margin-bottom: 36px;
+    }
+
+    .edition-admin-nav {
+        margin-bottom: 42px;
+    }
+
+    .edition-add-student {
+        grid-template-columns: minmax(180px, 0.55fr) minmax(0, 1.45fr);
+        gap: 36px;
+    }
+
+    .edition-student-row {
+        grid-template-columns:
+            minmax(190px, 1fr)
+            minmax(220px, 1.2fr)
+            auto;
+
+        gap: 20px;
+    }
+
+}
+
+
+/* ==========================================================================
+   EDITION ADMIN — MOBILE
+   ========================================================================== */
+
+@media (max-width: 640px) {
+
+    .admin-page--edition {
+        max-width: none;
+    }
+
+    .admin-page--edition .activity-detail-back {
+        margin-bottom: 26px;
+    }
+
+    .edition-admin-hero {
+        margin-bottom: 32px;
+    }
+
+    .edition-admin-hero__type {
+        margin-bottom: 9px;
+
+        font-size: 13px;
+    }
+
+    .edition-admin-hero h1 {
+        font-size: 34px;
+        line-height: 1.08;
+        letter-spacing: -0.04em;
+    }
+
+    .edition-admin-hero__meta {
+        margin-top: 15px;
+
+        font-size: 14px;
+    }
+
+    .edition-admin-nav {
+        gap: 26px;
+
+        width: auto;
+
+        margin-right: -16px;
+        margin-bottom: 36px;
+
+        padding-right: 16px;
+    }
+
+    .edition-admin-nav__item {
+        padding-bottom: 15px;
+
+        font-size: 14px;
+    }
+
+    .edition-students__header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+
+        margin-bottom: 25px;
+    }
+
+    .edition-students__header h2 {
+        font-size: 27px;
+    }
+
+    .edition-students__header p {
+        margin-top: 7px;
+
+        font-size: 14px;
+    }
+
+    .edition-add-student {
+        grid-template-columns: 1fr;
+        gap: 22px;
+
+        margin-bottom: 36px;
+        padding: 27px 0;
+    }
+
+    .edition-add-student__intro p {
+        max-width: none;
+    }
+
+    .edition-student-search__controls {
+        grid-template-columns: 1fr;
+
+        max-width: none;
+    }
+
+    .edition-student-search .activity-action-primary {
+        width: 100%;
+    }
+
+    .edition-person-result {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 17px;
+
+        max-width: none;
+
+        padding: 17px;
+    }
+
+    .edition-person-result form,
+    .edition-person-result .activity-action-primary {
+        width: 100%;
+    }
+
+    .edition-student-row {
+        grid-template-columns: 1fr auto;
+        gap: 8px 18px;
+
+        min-height: 0;
+        padding: 19px 0;
+    }
+
+    .edition-student-row__identity {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .edition-student-row__status {
+        grid-column: 2;
+        grid-row: 1;
+
+        align-self: start;
+    }
+
+    .edition-student-row__email {
+        grid-column: 1 / -1;
+        grid-row: 2;
+
+        font-size: 13px;
+
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+}
+
+
+/* ==========================================================================
+   EDITION ADMIN — SMALL MOBILE
+   ========================================================================== */
+
+@media (max-width: 420px) {
+
+    .edition-admin-hero h1 {
+        font-size: 31px;
+    }
+
+    .edition-admin-nav {
+        gap: 23px;
+    }
+
+    .edition-student-row {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+
+    .edition-student-row__identity,
+    .edition-student-row__status,
+    .edition-student-row__email {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .edition-student-row__status {
+        justify-self: start;
+
+        margin-top: 7px;
+    }
+
+}
