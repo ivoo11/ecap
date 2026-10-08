@@ -194,6 +194,143 @@ a {
     background: #ffffff;
 }
 
+/* ==========================================================================
+   Sidebar — Navegación agrupada
+   ========================================================================== */
+
+/* Menú con scroll independiente */
+
+.admin-sidebar .admin-nav {
+    flex: 1;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding: 8px 4px 28px 0;
+
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+.admin-sidebar .admin-nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.admin-sidebar .admin-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.admin-sidebar .admin-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
+}
+
+
+/* Grupos de navegación */
+
+.admin-nav__group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+
+/* Encabezados de sección */
+
+.admin-nav__heading {
+    display: block;
+
+    margin-bottom: 8px;
+    padding: 0 12px;
+
+    color: rgba(255, 255, 255, 0.38);
+
+    font-size: 10px;
+    font-weight: 650;
+    line-height: 1.5;
+
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+
+
+/* Enlaces del menú */
+
+.admin-nav__group .admin-nav__item {
+    min-height: 38px;
+    padding: 8px 12px;
+
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+
+    border-radius: 7px;
+}
+
+
+/* Hover */
+
+.admin-nav__group a.admin-nav__item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+}
+
+
+/* Sección activa */
+
+.admin-nav__group .admin-nav__item.is-active {
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+
+    font-weight: 600;
+}
+
+
+/* Indicador activo */
+
+.admin-nav__group .admin-nav__item.is-active::before {
+    width: 2px;
+    height: 16px;
+}
+
+
+/* Secciones todavía no disponibles */
+
+.admin-nav__group .admin-nav__item.is-disabled {
+    color: rgba(255, 255, 255, 0.30);
+
+    cursor: default;
+    pointer-events: none;
+    user-select: none;
+}
+
+
+/* Evitar efectos hover en elementos deshabilitados */
+
+.admin-nav__group .admin-nav__item.is-disabled:hover {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.30);
+}
+
+
+/* Logo siempre visible */
+
+.admin-sidebar__brand {
+    flex-shrink: 0;
+}
+
+
+/* Usuario y cierre de sesión siempre visibles */
+
+.admin-sidebar__footer {
+    flex-shrink: 0;
+    margin-top: 0;
+}
 
 /* ==========================================================================
    Sidebar footer

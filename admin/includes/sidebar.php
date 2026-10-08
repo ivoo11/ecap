@@ -8,6 +8,8 @@ declare(strict_types=1);
     id="admin-sidebar"
 >
 
+    <!-- IDENTIDAD INSTITUCIONAL -->
+
     <div class="admin-sidebar__brand">
         <a href="/admin/" aria-label="ECAP - Panel de Administración">
             <img
@@ -18,40 +20,167 @@ declare(strict_types=1);
         </a>
     </div>
 
+
+    <!-- NAVEGACIÓN ADMINISTRATIVA -->
+
     <nav
         class="admin-nav"
         aria-label="Navegación administrativa"
     >
 
-        <a
-            href="/admin/"
-            class="admin-nav__item <?= $pageSection === 'inicio' ? 'is-active' : '' ?>"
-        >
-            Inicio
-        </a>
+        <!-- INICIO -->
 
-        <a
-            href="/admin/actividades/"
-            class="admin-nav__item <?= $pageSection === 'actividades' ? 'is-active' : '' ?>"
-        >
-            Actividades
-        </a>
+        <div class="admin-nav__group">
 
-        <a
-            href="/admin/docentes/"
-            class="admin-nav__item <?= $pageSection === 'docentes' ? 'is-active' : '' ?>"
-        >
-            Docentes
-        </a>
+            <span class="admin-nav__heading">
+                Inicio
+            </span>
 
-        <a
-            href="/admin/alumnos/"
-            class="admin-nav__item <?= $pageSection === 'alumnos' ? 'is-active' : '' ?>"
-        >
-            Alumnos
-        </a>
+            <a
+                href="/admin/"
+                class="admin-nav__item <?= $pageSection === 'inicio' ? 'is-active' : '' ?>"
+                <?= $pageSection === 'inicio' ? 'aria-current="page"' : '' ?>
+            >
+                Panel general
+            </a>
+
+        </div>
+
+
+        <!-- GESTIÓN ACADÉMICA -->
+
+        <div class="admin-nav__group">
+
+            <span class="admin-nav__heading">
+                Gestión académica
+            </span>
+
+            <a
+                href="/admin/actividades/"
+                class="admin-nav__item <?= $pageSection === 'actividades' ? 'is-active' : '' ?>"
+                <?= $pageSection === 'actividades' ? 'aria-current="page"' : '' ?>
+            >
+                Capacitaciones
+            </a>
+
+            <span class="admin-nav__item is-disabled">
+                Clases
+            </span>
+
+            <a
+                href="/admin/alumnos/"
+                class="admin-nav__item <?= $pageSection === 'alumnos' ? 'is-active' : '' ?>"
+                <?= $pageSection === 'alumnos' ? 'aria-current="page"' : '' ?>
+            >
+                Alumnos
+            </a>
+
+            <a
+                href="/admin/docentes/"
+                class="admin-nav__item <?= $pageSection === 'docentes' ? 'is-active' : '' ?>"
+                <?= $pageSection === 'docentes' ? 'aria-current="page"' : '' ?>
+            >
+                Docentes
+            </a>
+
+            <span class="admin-nav__item is-disabled">
+                Materiales
+            </span>
+
+            <span class="admin-nav__item is-disabled">
+                Certificados
+            </span>
+
+        </div>
+
+
+        <!-- GESTIÓN ECONÓMICA -->
+
+        <div class="admin-nav__group">
+
+            <span class="admin-nav__heading">
+                Gestión económica
+            </span>
+
+            <span class="admin-nav__item is-disabled">
+                Pagos
+            </span>
+
+            <span class="admin-nav__item is-disabled">
+                Aranceles
+            </span>
+
+            <span class="admin-nav__item is-disabled">
+                Descuentos y beneficios
+            </span>
+
+            <span class="admin-nav__item is-disabled">
+                Convenios
+            </span>
+
+        </div>
+
+
+        <!-- COMUNIDAD -->
+
+        <div class="admin-nav__group">
+
+            <span class="admin-nav__heading">
+                Comunidad
+            </span>
+
+            <span class="admin-nav__item is-disabled">
+                Personas
+            </span>
+
+        </div>
+
+
+        <!-- COMUNICACIONES -->
+
+        <div class="admin-nav__group">
+
+            <span class="admin-nav__heading">
+                Comunicaciones
+            </span>
+
+            <span class="admin-nav__item is-disabled">
+                Correos transaccionales
+            </span>
+
+            <span class="admin-nav__item is-disabled">
+                Recordatorios
+            </span>
+
+            <span class="admin-nav__item is-disabled">
+                Historial de envíos
+            </span>
+
+        </div>
+
+
+        <!-- ADMINISTRACIÓN -->
+
+        <div class="admin-nav__group">
+
+            <span class="admin-nav__heading">
+                Administración
+            </span>
+
+            <span class="admin-nav__item is-disabled">
+                Usuarios y permisos
+            </span>
+
+            <span class="admin-nav__item is-disabled">
+                Configuración
+            </span>
+
+        </div>
 
     </nav>
+
+
+    <!-- USUARIO Y SESIÓN -->
 
     <div class="admin-sidebar__footer">
 
@@ -85,11 +214,15 @@ declare(strict_types=1);
             >
                 Cerrar sesión
             </button>
+
         </form>
 
     </div>
 
 </aside>
+
+
+<!-- OVERLAY PARA NAVEGACIÓN MÓVIL -->
 
 <div
     class="admin-sidebar-overlay"
