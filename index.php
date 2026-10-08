@@ -686,7 +686,12 @@ function imagenActividad(?string $imagen): ?string
                                 $inscriptosConfirmados < $cupoMaximo;
 
 
-                            if (
+                            if ($estadoEdicion === 'en_curso') {
+
+                                $estadoPublico = 'ACTIVIDAD EN CURSO';
+                                $estadoClase = 'is-running';
+
+                            } elseif (
                                 !$hayCupo ||
                                 $estadoEdicion === 'cupo_completo'
                             ) {
@@ -709,18 +714,12 @@ function imagenActividad(?string $imagen): ?string
                                 $estadoPublico = 'INSCRIPCIONES CERRADAS';
                                 $estadoClase = 'is-closed';
 
-                            } elseif ($estadoEdicion === 'en_curso') {
-
-                                $estadoPublico = 'ACTIVIDAD EN CURSO';
-                                $estadoClase = 'is-running';
-
                             } else {
 
                                 $estadoPublico = '';
                                 $estadoClase = '';
 
                             }
-
                         ?>
 
                         <article class="activity-item">
