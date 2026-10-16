@@ -3568,8 +3568,47 @@ a {
 
 }
 /* Cambio de inscripción desde el listado. */
-.admin-quick-state { display: grid; grid-template-columns: minmax(120px, 1fr) auto; gap: 6px; min-width: 215px; align-items: center; }
+.admin-quick-state {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) 36px;
+    gap: 4px 6px;
+    min-width: 182px;
+    align-items: center;
+}
 .admin-quick-state label { grid-column: 1 / -1; font-size: .75rem; color: #64748b; }
-.admin-quick-state .admin-select { min-width: 0; width: 100%; padding: 8px 10px; }
-.admin-quick-state .admin-button { padding: 9px 12px; font-size: .8rem; }
+.admin-quick-state .admin-select {
+    min-width: 0;
+    width: 100%;
+    min-height: 36px;
+    padding: 6px 24px 6px 12px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background-color: rgba(16, 29, 48, 0.07);
+    color: var(--admin-text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.admin-quick-state__save {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--admin-text);
+    cursor: pointer;
+}
+.admin-quick-state__save:hover { background: rgba(16, 29, 48, 0.07); }
+.admin-quick-state__save:focus-visible,
+.admin-quick-state .admin-select:focus-visible { outline: 2px solid var(--admin-text); outline-offset: 2px; }
 .admin-table td > small { display: block; margin-top: 6px; }
+@media (pointer: coarse) {
+    .admin-quick-state { grid-template-columns: minmax(140px, 1fr) 44px; }
+    .admin-quick-state .admin-select { min-height: 44px; }
+    .admin-quick-state__save { width: 44px; height: 44px; }
+}
