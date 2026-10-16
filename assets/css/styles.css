@@ -2700,6 +2700,7 @@ textarea {
 }
 
 /* Detalle: contenido centrado y perfil docente en una misma columna editorial. */
+.activity-detail .activity-intro > .container,
 .activity-detail .detail-description > .container,
 .activity-detail .activity-bios > .container {
     width: min(960px, calc(100% - 48px));
@@ -2761,4 +2762,17 @@ textarea {
     .activity-detail .activity-bio--with-photo { grid-template-columns: minmax(0, 1fr); gap: 24px; }
     .activity-detail .activity-bio-copy { grid-column: 1; grid-row: 2; }
     .activity-detail .activity-bio-photo { width: 180px; }
+}
+
+/* Cabecera del detalle: escala legible y alineación con el contenido. */
+.activity-detail .activity-intro { padding: 56px 0 0; }
+.activity-detail .activity-title {
+    max-width: 960px;
+    font-size: clamp(2rem, 4.2vw, 3.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+}
+@media (max-width: 700px) {
+    .activity-detail .activity-intro > .container { width: calc(100% - 40px); }
+    .activity-detail .activity-intro { padding-top: 36px; }
 }

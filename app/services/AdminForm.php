@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/PublicImage.php';
 
 /** Helpers compartidos por los formularios privados, después del bootstrap. */
 final class AdminForm
@@ -47,7 +48,7 @@ final class AdminForm
         $image = @imagecreatefromstring(file_get_contents($file['tmp_name']));
         if (!$image) throw new DomainException('No se pudo leer la imagen.');
         imagesavealpha($image, true);
-        $directory = dirname(__DIR__, 2) . '/assets/img/' . $folder;
+        $directory = PublicImage::directory($folder);
         if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) throw new RuntimeException('No se pudo crear la carpeta de imágenes.');
         $name = 'ecap-' . bin2hex(random_bytes(16)) . '.png';
         if (!imagepng($image, $directory . '/' . $name)) throw new RuntimeException('No se pudo guardar la imagen.');
@@ -57,7 +58,7 @@ final class AdminForm
     public static function discardImage(?string $name, string $folder): void
     {
         if ($name && preg_match('/^ecap-[a-f0-9]{32}\.png$/D', $name)) {
-            @unlink(dirname(__DIR__, 2) . '/assets/img/' . $folder . '/' . $name);
+            @unlink(PublicImage::directory($folder) . '/' . $name);
         }
     }
 }

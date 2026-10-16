@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+require_once __DIR__ . '/app/services/PublicImage.php';
 
 require_once __DIR__ . '/app/config/database.php';
 require_once __DIR__ . '/app/services/EstadoEdiciones.php';
@@ -290,7 +291,7 @@ function imagenActividad(?string $imagen): ?string
         return null;
     }
 
-    return 'assets/img/actividades/' . rawurlencode($imagen);
+    return PublicImage::url('actividades', $imagen);
 }
 ?>
 

@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+require_once __DIR__ . '/../app/services/PublicImage.php';
 
 require_once __DIR__ . '/../app/config/database.php';
 require_once __DIR__ . '/../app/services/EstadoEdiciones.php';
@@ -242,8 +243,7 @@ $imagenPortada = null;
 
 if (!empty($actividad['imagen_portada'])) {
     $imagenPortada =
-        '../assets/img/actividades/' .
-        rawurlencode($actividad['imagen_portada']);
+        PublicImage::url('actividades', $actividad['imagen_portada']);
 }
 
 ?>
@@ -382,25 +382,7 @@ if (!empty($actividad['imagen_portada'])) {
          Sólo aparece si existe
          ===================================================== -->
 
-    <?php if (!empty($actividad['descripcion'])): ?>
 
-        <section class="detail-description">
-
-            <div class="container detail-content-grid">
-
-                <h2>
-                    Sobre la actividad
-                </h2>
-
-                <div class="detail-body">
-                    <?= parrafosActividad($actividad['descripcion']) ?>
-                </div>
-
-            </div>
-
-        </section>
-
-    <?php endif; ?>
 
 
 <?php if (!empty($docentes)): ?>
@@ -505,6 +487,26 @@ if (!empty($actividad['imagen_portada'])) {
 </section>
 
 
+    <?php if (!empty($actividad['descripcion'])): ?>
+
+        <section class="detail-description">
+
+            <div class="container detail-content-grid">
+
+                <h2>
+                    Sobre la actividad
+                </h2>
+
+                <div class="detail-body">
+                    <?= parrafosActividad($actividad['descripcion']) ?>
+                </div>
+
+            </div>
+
+        </section>
+
+    <?php endif; ?>
+
 <?php if (!empty($docentes)): ?>
 
     <section class="activity-bios">
@@ -526,8 +528,7 @@ if (!empty($actividad['imagen_portada'])) {
 
                         if (!empty($docente['foto'])) {
                             $fotoDocente =
-                                '../assets/img/docentes/' .
-                                rawurlencode($docente['foto']);
+                                PublicImage::url('docentes', $docente['foto']);
                         }
                     ?>
 
