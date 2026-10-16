@@ -377,7 +377,33 @@ if (!empty($actividad['imagen_portada'])) {
             <?= htmlspecialchars($actividad['titulo']) ?>
         </h1>
 
-        <?php if (!empty($docentes)): ?>
+            <!-- =====================================================
+         DESCRIPCIÓN
+         Sólo aparece si existe
+         ===================================================== -->
+
+    <?php if (!empty($actividad['descripcion'])): ?>
+
+        <section class="detail-description">
+
+            <div class="container detail-content-grid">
+
+                <h2>
+                    Sobre la actividad
+                </h2>
+
+                <div class="detail-body">
+                    <?= parrafosActividad($actividad['descripcion']) ?>
+                </div>
+
+            </div>
+
+        </section>
+
+    <?php endif; ?>
+
+
+<?php if (!empty($docentes)): ?>
 
             <div class="activity-teachers">
 
@@ -554,31 +580,6 @@ if (!empty($actividad['imagen_portada'])) {
 <?php endif; ?>
 
 
-
-    <!-- =====================================================
-         DESCRIPCIÓN
-         Sólo aparece si existe
-         ===================================================== -->
-
-    <?php if (!empty($actividad['descripcion'])): ?>
-
-        <section class="detail-description">
-
-            <div class="container detail-content-grid">
-
-                <h2>
-                    Sobre la actividad
-                </h2>
-
-                <div class="detail-body">
-                    <?= parrafosActividad($actividad['descripcion']) ?>
-                </div>
-
-            </div>
-
-        </section>
-
-    <?php endif; ?>
 
 </main>
 

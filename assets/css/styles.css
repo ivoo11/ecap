@@ -2699,69 +2699,66 @@ textarea {
     transform: translateX(3px);
 }
 
-/* Lectura del detalle: párrafos y espacio antes del footer. */
-.activity-detail .activity-bios {
-    padding-bottom: clamp(40px, 6vw, 72px);
-}
-.activity-detail .activity-bio {
+/* Detalle: contenido centrado y perfil docente en una misma columna editorial. */
+.activity-detail .detail-description > .container,
+.activity-detail .activity-bios > .container {
+    width: min(960px, calc(100% - 48px));
     max-width: 960px;
-    grid-template-columns: 150px minmax(0, 68ch);
-    gap: 32px;
+    margin-inline: auto;
 }
-.activity-detail .activity-bio--text-only {
-    display: block;
-    max-width: 68ch;
+.activity-detail .detail-description { padding: 48px 0 56px; }
+.activity-detail .detail-content-grid { display: grid; gap: 24px; }
+.activity-detail .detail-description h2,
+.activity-detail .activity-bios-title {
+    margin: 0;
+    font-size: clamp(1.55rem, 2vw, 1.9rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
 }
-.activity-detail .activity-bio-copy {
-    grid-column: 2;
+.activity-detail .detail-body { max-width: 76ch; color: var(--muted); }
+.activity-detail .activity-bios { padding: 0 0 88px; }
+.activity-detail .activity-bios > .container { padding-top: 40px; }
+.activity-detail .activity-bios-title { margin-bottom: 32px; }
+.activity-detail .activity-bio {
+    max-width: none;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 40px;
+    align-items: start;
+}
+.activity-detail .activity-bio--text-only { display: block; max-width: 76ch; }
+.activity-detail .activity-bio-copy { grid-column: 2; grid-row: 1; min-width: 0; }
+.activity-detail .activity-bio-photo {
+    width: 240px;
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: #f5f6f8;
+    overflow: hidden;
+    grid-column: 1;
     grid-row: 1;
-    min-width: 0;
 }
+.activity-detail .activity-bio-photo img { object-fit: cover; object-position: center 20%; }
 .activity-detail .activity-bio p,
 .activity-detail .detail-body p {
     max-width: none;
     margin: 0;
+    font-size: 1rem;
     line-height: 1.75;
     overflow-wrap: anywhere;
 }
 .activity-detail .activity-bio p + p,
-.activity-detail .detail-body p + p {
-    margin-top: 1em;
-}
-.activity-detail .activity-bio-name {
-    margin: 0 0 16px;
-}
-.activity-detail .detail-description {
-    padding: 0 0 clamp(64px, 8vw, 112px);
-}
-.activity-detail .detail-content-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 28px;
-}
-.activity-detail .detail-description h2 {
-    margin: 0;
-    font-size: clamp(1.55rem, 2vw, 1.9rem);
-    font-weight: 600;
-    letter-spacing: -0.035em;
-}
-.activity-detail .detail-body {
-    max-width: 68ch;
-    color: var(--muted);
-    font-size: 1rem;
-}
-@media (max-width: 640px) {
-    .activity-detail .activity-bio--with-photo {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 24px;
-    }
-    .activity-detail .activity-bio-copy {
-        grid-column: 1;
-        grid-row: 2;
-    }
-    .activity-detail .activity-bio-photo {
-        width: 112px;
-        height: 112px;
-    }
-    .activity-detail .detail-body { font-size: 0.94rem; }
+.activity-detail .detail-body p + p { margin-top: 1em; }
+.activity-detail .activity-bio-name { margin: 0 0 16px; }
+@media (max-width: 700px) {
+    .activity-detail .detail-description > .container,
+    .activity-detail .activity-bios > .container { width: calc(100% - 40px); }
+    .activity-detail .detail-description { padding: 32px 0 36px; }
+    .activity-detail .activity-bios { padding-bottom: 56px; }
+    .activity-detail .activity-bios > .container { padding-top: 32px; }
+    .activity-detail .activity-bio--with-photo { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .activity-detail .activity-bio-copy { grid-column: 1; grid-row: 2; }
+    .activity-detail .activity-bio-photo { width: 180px; }
 }
