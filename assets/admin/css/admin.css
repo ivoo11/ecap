@@ -3567,3 +3567,9 @@ a {
     }
 
 }
+/* Cambio de inscripción desde el listado. */
+.admin-quick-state { display: grid; grid-template-columns: minmax(120px, 1fr) auto; gap: 6px; min-width: 215px; align-items: center; }
+.admin-quick-state label { grid-column: 1 / -1; font-size: .75rem; color: #64748b; }
+.admin-quick-state .admin-select { min-width: 0; width: 100%; padding: 8px 10px; }
+.admin-quick-state .admin-button { padding: 9px 12px; font-size: .8rem; }
+.admin-table td > small { display: block; margin-top: 6px; }

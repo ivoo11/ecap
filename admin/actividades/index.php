@@ -4,6 +4,32 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/bootstrap.php';
 
+require_once __DIR__ . '/../../app/services/AdminForm.php';
+require __DIR__ . '/../../app/services/EstadoEdiciones.php';
+$estadosInscripcion = ['proximamente'=>'Próximamente', 'inscripcion_abierta'=>'Abiertas', 'inscripcion_cerrada'=>'Cerradas'];
+$errorEstado = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    AdminForm::csrf();
+    $id = filter_var(AdminForm::text('edicion_id'), FILTER_VALIDATE_INT);
+    $estado = AdminForm::text('estado');
+    try {
+        if (!$id || !isset($estadosInscripcion[$estado])) throw new DomainException('Elegí un estado de inscripción válido.');
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare('SELECT estado,fecha_inicio FROM ediciones WHERE id=? FOR UPDATE');
+        $stmt->execute([$id]); $actual = $stmt->fetch();
+        if (!$actual || !in_array($actual['estado'], ['proximamente','inscripcion_abierta','inscripcion_cerrada','cupo_completo'],true)
+            || new DateTimeImmutable($actual['fecha_inicio']) <= new DateTimeImmutable()) throw new DomainException('Esta edición ya no admite cambios rápidos de inscripción. Recargá el listado.');
+        if ($actual['estado'] !== AdminForm::text('estado_anterior')) throw new DomainException('El estado cambió desde que abriste la página. Revisalo antes de guardar.');
+        $pdo->prepare('UPDATE ediciones SET estado=? WHERE id=?')->execute([$estado,$id]);
+        $pdo->commit();
+        header('Location: /admin/actividades/?estado_guardado=1'); exit;
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        $errorEstado = $e instanceof DomainException ? $e->getMessage() : 'No se pudo cambiar el estado. Volvé a intentarlo.';
+        if (!$e instanceof DomainException) error_log('Estado rápido ECAP: '.$e->getMessage());
+    }
+}
+
 $pageTitle = 'Actividades';
 $pageSection = 'actividades';
 
@@ -120,6 +146,9 @@ require __DIR__ . '/../includes/header.php';
     </header>
 
 
+    <?php if ($errorEstado): ?><div class="admin-alert admin-alert--error" role="alert"><?= AdminForm::escape($errorEstado) ?></div><?php endif; ?>
+    <?php if (isset($_GET['estado_guardado']) && !$errorEstado): ?><div class="edition-message edition-message--success" role="status">Estado de inscripción guardado. No se enviaron correos.</div><?php endif; ?>
+    <p class="admin-text-muted">El selector cambia las inscripciones de la edición indicada. En curso y Finalizada se actualizan por fecha; los cupos agotados se calculan automáticamente.</p>
     <?php if (!$actividades): ?>
 
         <div class="admin-card">
@@ -226,27 +255,23 @@ require __DIR__ . '/../includes/header.php';
 
                         <td>
 
-                            <?php if ($actividad['edicion_estado']): ?>
-
-                                <span class="admin-status">
-                                    <?= htmlspecialchars(
-                                        adminEstadoEdicion(
-                                            $actividad['edicion_estado']
-                                        ),
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>
-                                </span>
-
+                            <?php $rapido = in_array($actividad['edicion_estado'], ['proximamente','inscripcion_abierta','inscripcion_cerrada','cupo_completo'],true) && strtotime($actividad['fecha_inicio'] ?? '') > time(); ?>
+                            <?php if ($rapido): ?>
+                            <form method="post" class="admin-quick-state">
+                                <?= Csrf::field() ?>
+                                <input type="hidden" name="edicion_id" value="<?= (int)$actividad['edicion_id'] ?>">
+                                <input type="hidden" name="estado_anterior" value="<?= AdminForm::escape($actividad['edicion_estado']) ?>">
+                                <label for="estado-<?= (int)$actividad['edicion_id'] ?>">Inscripciones</label>
+                                <select class="admin-select" name="estado" id="estado-<?= (int)$actividad['edicion_id'] ?>" aria-label="<?= AdminForm::escape('Inscripciones: '.$actividad['titulo']) ?>">
+                                <?php foreach ($estadosInscripcion as $value=>$label): ?><option value="<?= $value ?>" <?= ($actividad['edicion_estado']==='cupo_completo'?'inscripcion_abierta':$actividad['edicion_estado'])===$value?'selected':'' ?>><?= $label ?></option><?php endforeach; ?>
+                                </select>
+                                <button type="submit" class="admin-button">Guardar</button>
+                            </form>
                             <?php else: ?>
-
-                                <span class="admin-status admin-status--muted">
-                                    <?= $actividad['estado'] === 'publicada'
-                                        ? 'Publicada'
-                                        : 'Borrador' ?>
-                                </span>
-
+                            <span class="admin-status"><?= AdminForm::escape($actividad['edicion_estado'] ? adminEstadoEdicion($actividad['edicion_estado']) : ($actividad['estado']==='publicada'?'Publicada':'Borrador')) ?></span>
+                            <?php if (in_array($actividad['edicion_estado'],['en_curso','finalizada'],true)): ?><small class="admin-text-muted">Automático</small><?php endif; ?>
                             <?php endif; ?>
+                            <?php if ($actividad['estado'] !== 'publicada'): ?><small class="admin-text-muted">Actividad no publicada</small><?php endif; ?>
 
                         </td>
 

@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../includes/bootstrap.php';
+require __DIR__ . '/../../../app/services/EstadoEdiciones.php';
 
 $edicionId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: null;
 $actividadId = filter_input(INPUT_GET, 'actividad', FILTER_VALIDATE_INT) ?: null;
@@ -25,7 +26,7 @@ if ($edicionId) {
     $asignados = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
 }
 $docentes = $pdo->query('SELECT d.id, d.activo, d.titulo_profesional, p.nombre, p.apellido FROM docentes d JOIN personas p ON p.id=d.persona_id ORDER BY p.apellido,p.nombre')->fetchAll();
-$estados = ['borrador'=>'Borrador', 'proximamente'=>'Inscripciones próximamente', 'inscripcion_abierta'=>'Inscripciones abiertas', 'inscripcion_cerrada'=>'Inscripciones cerradas', 'en_curso'=>'En curso', 'finalizada'=>'Finalizada', 'cancelada'=>'Cancelada'];
+$estados = ['borrador'=>'Borrador', 'proximamente'=>'Inscripciones próximamente', 'inscripcion_abierta'=>'Inscripciones abiertas', 'inscripcion_cerrada'=>'Inscripciones cerradas', 'cancelada'=>'Cancelada'];
 $valores = [
     'fecha_inicio' => $edicion ? substr(str_replace(' ', 'T', $edicion['fecha_inicio']), 0, 16) : '',
     'fecha_fin' => !empty($edicion['fecha_fin']) ? substr(str_replace(' ', 'T', $edicion['fecha_fin']), 0, 16) : '',
@@ -36,6 +37,7 @@ $valores = [
     'zoom_meeting_id' => $edicion['zoom_meeting_id'] ?? '',
     'zoom_passcode' => $edicion['zoom_passcode'] ?? '',
 ];
+$estadoAutomatico = in_array($edicion['estado'] ?? '', ['en_curso','finalizada'], true);
 $seleccionados = $asignados;
 $publicar = false;
 $errores = [];
@@ -51,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit('La sesión del formulario venció. Recargá la página.');
     }
     foreach ($valores as $key => $_) $valores[$key] = is_string($_POST[$key] ?? null) ? trim($_POST[$key]) : '';
+    if ($estadoAutomatico) $valores['estado'] = $edicion['estado'];
     $publicar = ($_POST['publicar'] ?? '') === '1';
     $seleccionados = [];
     if (!is_array($_POST['docentes'] ?? [])) $errores[] = 'La selección de docentes no es válida.';
@@ -65,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fin = fechaFormularioEdicion($valores['fecha_fin']);
     if (!$inicio || !$fin || $fin <= $inicio) $errores[] = 'Indicá un inicio válido y una finalización posterior.';
     if (!in_array($valores['modalidad'], ['online','presencial','hibrida'], true)) $errores[] = 'Seleccioná una modalidad válida.';
-    if (!isset($estados[$valores['estado']])) $errores[] = 'Seleccioná un estado válido.';
+    if (!$estadoAutomatico && !isset($estados[$valores['estado']])) $errores[] = 'Seleccioná un estado válido.';
     if ($inicio && $valores['estado'] === 'inscripcion_abierta' && $inicio <= new DateTimeImmutable()) $errores[] = 'No se puede abrir la inscripción de una edición que ya comenzó.';
     $cupo = null;
     if ($valores['cupo_maximo'] !== '') {
@@ -84,10 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$stmt->fetchColumn()) throw new DomainException('La actividad ya no está disponible.');
             $clases = [];
             if ($edicionId) {
-                $stmt = $pdo->prepare('SELECT id,fecha_inicio,fecha_fin FROM ediciones WHERE id = ? AND actividad_id = ? FOR UPDATE');
+                $stmt = $pdo->prepare('SELECT id,fecha_inicio,fecha_fin,estado FROM ediciones WHERE id = ? AND actividad_id = ? FOR UPDATE');
                 $stmt->execute([$edicionId, $actividadId]);
                 $edicionActual = $stmt->fetch();
                 if (!$edicionActual) throw new DomainException('La edición ya no está disponible.');
+                if (in_array($edicionActual['estado'], ['en_curso','finalizada'], true)) $valores['estado'] = $edicionActual['estado'];
+                elseif ($estadoAutomatico) throw new DomainException('El estado cambió. Recargá la configuración.');
                 $stmt = $pdo->prepare("SELECT COUNT(*) FROM inscripciones WHERE edicion_id = ? AND estado = 'confirmada'");
                 $stmt->execute([$edicionId]);
                 if ($cupo !== null && $cupo < (int) $stmt->fetchColumn()) throw new DomainException('El cupo no puede ser menor que la cantidad de inscripciones confirmadas.');
@@ -191,7 +196,12 @@ require __DIR__ . '/../../includes/header.php';
         <section class="activity-edition-section">
             <div class="activity-edition-section__intro"><h3>Inscripción y publicación</h3><p>Elegí si las inscripciones están próximas, abiertas o cerradas. Con inscripciones abiertas, «Cupos agotados» se muestra automáticamente al alcanzar el cupo; si vuelve a haber lugar, se muestran abiertas otra vez. Un borrador no se muestra en la web y la actividad también debe estar publicada.</p></div>
             <div class="activity-edition-fields">
+                <?php if ($estadoAutomatico): ?>
+                <p class="admin-status"><?= $edicion['estado']==='en_curso'?'En curso':'Finalizada' ?> · Automático</p>
+                <?php else: ?>
                 <div class="admin-field"><label for="estado">Estado de la edición</label><select id="estado" name="estado" class="admin-select"><?php foreach ($estados as $value=>$label): ?><option value="<?= $value ?>" <?= $valores['estado']===$value?'selected':'' ?>><?= $label ?></option><?php endforeach; ?></select></div>
+                <?php endif; ?>
+                <p class="admin-text-muted">En curso se asigna al llegar el inicio; Finalizada, 30 minutos después del final. Estos estados no se seleccionan manualmente.</p>
                 <?php if ($actividad['estado'] !== 'publicada'): ?><p><label><input type="checkbox" name="publicar" value="1" <?= $publicar?'checked':'' ?>> Publicar también la actividad</label></p><p class="admin-text-muted">La publicación de la actividad se aplica a todas sus ediciones visibles.</p><?php else: ?><p>La actividad ya está publicada.</p><?php endif; ?>
             </div>
         </section>
