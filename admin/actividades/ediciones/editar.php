@@ -427,17 +427,13 @@ require __DIR__ . '/../../includes/header.php';
         aria-label="Gestión de edición"
     >
 
-        <span class="edition-admin-nav__item">
+        <a class="edition-admin-nav__item" href="/admin/actividades/ediciones/configuracion.php?id=<?= (int) $edicionId ?>">
             Configuración
-        </span>
+        </a>
 
-        <span class="edition-admin-nav__item">
-            Docentes
-        </span>
+        <a class="edition-admin-nav__item" href="/admin/actividades/ediciones/configuracion.php?id=<?= (int)$edicionId ?>">Docentes</a>
 
-        <span class="edition-admin-nav__item">
-            Clases
-        </span>
+        <a class="edition-admin-nav__item" href="/admin/actividades/ediciones/clases.php?id=<?= (int)$edicionId ?>">Clases</a>
 
         <span class="edition-admin-nav__item is-active">
             Alumnos

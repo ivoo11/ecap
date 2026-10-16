@@ -138,47 +138,12 @@ if ($dni !== '') {
 
 
     if ($persona) {
-
-        $nombre = (string) $persona['nombre'];
-        $apellido = (string) $persona['apellido'];
-        $email = (string) $persona['email'];
-        $telefono = (string) ($persona['telefono'] ?? '');
-
-        $universidadId = $persona['universidad_id']
-            ? (int) $persona['universidad_id']
-            : null;
-
-        $universidadNombre = (string) (
-            $persona['universidad_nombre'] ?? ''
-        );
-
-        $universidadOtra = (string) (
-            $persona['universidad_otra'] ?? ''
-        );
-
-
-        /* ÁMBITOS YA ASOCIADOS */
-
-        $stmtAmbitos = $pdo->prepare("
-            SELECT ambito_id
-            FROM persona_ambitos
-            WHERE persona_id = :persona_id
-        ");
-
-        $stmtAmbitos->execute([
-            'persona_id' => $persona['id']
-        ]);
-
-        $ambitosPersona = array_map(
-            'intval',
-            $stmtAmbitos->fetchAll(PDO::FETCH_COLUMN)
-        );
+        // El DNI por sí solo no autoriza mostrar datos personales.
+        header('Location: ?edicion=' . $edicionId);
+        exit;
     }
 }
 
-/* =========================================================
-   URL VOLVER
-   ========================================================= */
 
 $volverUrl =
     '../actividades/?slug=' .

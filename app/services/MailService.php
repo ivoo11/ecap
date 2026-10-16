@@ -5,41 +5,14 @@ declare(strict_types=1);
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require_once __DIR__ . '/MailTransport.php';
+
 class MailService
 {
-    private array $config;
-
-    public function __construct()
-    {
-        $this->config = require __DIR__ . '/../config/mail.php';
-    }
-
-
     private function crearMailer(): PHPMailer
     {
-        $mail = new PHPMailer(true);
-
-        $mail->isSMTP();
-
-        $mail->Host = $this->config['host'];
-        $mail->SMTPAuth = true;
-
-        $mail->Username = $this->config['username'];
-        $mail->Password = $this->config['password'];
-
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-        $mail->Port = (int) $this->config['port'];
-
-        $mail->CharSet = 'UTF-8';
-
-        $mail->setFrom(
-            $this->config['from_email'],
-            $this->config['from_name']
-        );
-
-        return $mail;
+        return MailTransport::create();
     }
-
 
         public function enviarConfirmacionInscripcion(
             string $email,

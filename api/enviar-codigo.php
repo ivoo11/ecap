@@ -10,7 +10,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-$mailConfig = require __DIR__ . '/../app/config/mail.php';
+require_once __DIR__ . '/../app/services/MailTransport.php';
 
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -246,25 +246,7 @@ try {
 
 try {
 
-    $mail = new PHPMailer(true);
-
-    $mail->isSMTP();
-
-    $mail->Host = $mailConfig['host'];
-    $mail->SMTPAuth = true;
-
-    $mail->Username = $mailConfig['username'];
-    $mail->Password = $mailConfig['password'];
-
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-    $mail->Port = (int) $mailConfig['port'];
-
-    $mail->CharSet = 'UTF-8';
-
-    $mail->setFrom(
-        $mailConfig['from_email'],
-        $mailConfig['from_name']
-    );
+    $mail = MailTransport::create();
 
     $mail->addAddress(
         (string) $persona['email']

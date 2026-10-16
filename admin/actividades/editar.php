@@ -65,6 +65,38 @@ if (!in_array($seccion, ['general', 'ediciones'], true)) {
 }
 
 
+require_once __DIR__ . '/../../app/services/AdminForm.php';
+$erroresGeneral = [];
+$tiposGeneral = $pdo->query('SELECT id,nombre,activo FROM tipos_actividad ORDER BY nombre')->fetchAll();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    AdminForm::csrf();
+    $seccion = 'general';
+    $valoresGeneral = [];
+    foreach (['titulo','descripcion','programa','tipo_actividad_id','estado'] as $key) $valoresGeneral[$key] = AdminForm::text($key);
+    if ($valoresGeneral['titulo'] === '' || mb_strlen($valoresGeneral['titulo']) > 255) $erroresGeneral[] = 'Ingresá un título de hasta 255 caracteres.';
+    foreach (['descripcion','programa'] as $key) if (strlen($valoresGeneral[$key]) > 65535) $erroresGeneral[] = 'La descripción o el programa son demasiado extensos.';
+    $permitidos = array_column(array_filter($tiposGeneral, static fn($tipo) => $tipo['activo'] || $tipo['id']===$actividad['tipo_actividad_id']), 'id');
+    if (!ctype_digit($valoresGeneral['tipo_actividad_id']) || !in_array((int)$valoresGeneral['tipo_actividad_id'],$permitidos,true)) $erroresGeneral[] = 'Seleccioná un tipo de actividad válido.';
+    if (!in_array($valoresGeneral['estado'], ['borrador','publicada','archivada'],true)) $erroresGeneral[] = 'Seleccioná un estado válido.';
+    $imagenNueva = null;
+    if (!$erroresGeneral) try {
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare('SELECT imagen_portada FROM actividades WHERE id=? FOR UPDATE'); $stmt->execute([$actividadId]); $actual = $stmt->fetch();
+        if (!$actual) throw new DomainException('La actividad ya no está disponible.');
+        $imagenNueva = AdminForm::image('imagen_portada', 'actividades');
+        $imagen = $imagenNueva ?? (AdminForm::text('quitar_imagen')==='1' ? null : $actual['imagen_portada']);
+        $pdo->prepare('UPDATE actividades SET titulo=?,descripcion=?,programa=?,tipo_actividad_id=?,estado=?,imagen_portada=? WHERE id=?')->execute([$valoresGeneral['titulo'],$valoresGeneral['descripcion'] ?: null,$valoresGeneral['programa'] ?: null,(int)$valoresGeneral['tipo_actividad_id'],$valoresGeneral['estado'],$imagen,$actividadId]);
+        $pdo->commit(); Csrf::regenerate(); header('Location: /admin/actividades/editar.php?id='.$actividadId.'&seccion=general&guardada=1'); exit;
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        AdminForm::discardImage($imagenNueva, 'actividades');
+        $erroresGeneral[] = $e instanceof DomainException ? $e->getMessage() : 'No se pudo guardar la actividad. Volvé a intentarlo.';
+        if (!$e instanceof DomainException) error_log('Error guardando actividad ECAP: '.$e->getMessage());
+    }
+    $actividad = array_replace($actividad, $valoresGeneral);
+}
+
+
 /*
 |--------------------------------------------------------------------------
 | Ediciones de la actividad
@@ -224,122 +256,19 @@ require __DIR__ . '/../includes/header.php';
 
     <?php if ($seccion === 'general'): ?>
 
-        <section class="activity-detail-section">
-
-            <header class="activity-detail-section__header">
-
-                <div>
-                    <h2>Información general</h2>
-
-                    <p>
-                        Información académica que comparten todas
-                        las ediciones de esta actividad.
-                    </p>
-                </div>
-
-            </header>
-
-
-            <div class="activity-general-data">
-
-                <div class="activity-general-row">
-
-                    <span class="activity-general-row__label">
-                        Tipo
-                    </span>
-
-                    <strong>
-                        <?= htmlspecialchars(
-                            $actividad['tipo_actividad'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </strong>
-
-                </div>
-
-
-                <div class="activity-general-row">
-
-                    <span class="activity-general-row__label">
-                        Título
-                    </span>
-
-                    <strong>
-                        <?= htmlspecialchars(
-                            $actividad['titulo'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </strong>
-
-                </div>
-
-
-                <div class="activity-general-row">
-
-                    <span class="activity-general-row__label">
-                        Descripción
-                    </span>
-
-                    <div class="activity-general-row__content">
-
-                        <?php if (!empty($actividad['descripcion'])): ?>
-
-                            <?= nl2br(
-                                htmlspecialchars(
-                                    $actividad['descripcion'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                )
-                            ) ?>
-
-                        <?php else: ?>
-
-                            <span class="activity-general-empty">
-                                Sin descripción.
-                            </span>
-
-                        <?php endif; ?>
-
-                    </div>
-
-                </div>
-
-
-                <div class="activity-general-row">
-
-                    <span class="activity-general-row__label">
-                        Programa
-                    </span>
-
-                    <div class="activity-general-row__content">
-
-                        <?php if (!empty($actividad['programa'])): ?>
-
-                            <?= nl2br(
-                                htmlspecialchars(
-                                    $actividad['programa'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                )
-                            ) ?>
-
-                        <?php else: ?>
-
-                            <span class="activity-general-empty">
-                                Sin programa.
-                            </span>
-
-                        <?php endif; ?>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
+<?php if ($erroresGeneral): ?><div class="admin-alert admin-alert--error" role="alert"><ul><?php foreach ($erroresGeneral as $error): ?><li><?= AdminForm::escape($error) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
+<?php if (isset($_GET['guardada']) && !$erroresGeneral): ?><div class="edition-message edition-message--success" role="status">Actividad guardada.</div><?php endif; ?>
+<form method="post" enctype="multipart/form-data" class="activity-create-form"><section class="activity-editor-surface"><div class="activity-editor-body">
+<?= Csrf::field() ?>
+<h2>Información general</h2><p>Estos datos se comparten entre todas las ediciones. El enlace de la actividad se conserva aunque cambies su título.</p>
+<div class="admin-field"><label for="tipo_actividad_id">Tipo de actividad</label><select class="admin-select" id="tipo_actividad_id" name="tipo_actividad_id" required><?php foreach ($tiposGeneral as $tipo): if (!$tipo['activo'] && $tipo['id']!==$actividad['tipo_actividad_id']) continue; ?><option value="<?= (int)$tipo['id'] ?>" <?= (int)$actividad['tipo_actividad_id']===(int)$tipo['id']?'selected':'' ?>><?= AdminForm::escape($tipo['nombre']) ?></option><?php endforeach; ?></select></div>
+<div class="activity-editor-field"><label for="titulo">Título</label><input id="titulo" name="titulo" maxlength="255" value="<?= AdminForm::escape($actividad['titulo']) ?>" required></div>
+<?php foreach (['descripcion'=>'Descripción','programa'=>'Programa'] as $key=>$label): ?><div class="activity-editor-field"><label for="<?= $key ?>"><?= $label ?></label><textarea id="<?= $key ?>" name="<?= $key ?>" rows="7"><?= AdminForm::escape($actividad[$key]) ?></textarea></div><?php endforeach; ?>
+<?php if ($actividad['imagen_portada']): ?><p><a href="/assets/img/actividades/<?= rawurlencode($actividad['imagen_portada']) ?>" target="_blank" rel="noopener">Ver imagen actual</a></p><p><label><input type="checkbox" name="quitar_imagen" value="1"> Quitar imagen de portada</label></p><?php endif; ?>
+<div class="activity-editor-field"><label for="imagen_portada">Imagen de portada (JPG, PNG o WebP, hasta 2 MB)</label><input id="imagen_portada" name="imagen_portada" type="file" accept="image/jpeg,image/png,image/webp"><p>Si hay un error al guardar, seleccioná el archivo nuevamente.</p></div>
+<div class="admin-field"><label for="estado">Estado de la actividad</label><select class="admin-select" id="estado" name="estado"><?php foreach (['borrador'=>'Borrador','publicada'=>'Publicada','archivada'=>'Archivada'] as $value=>$label): ?><option value="<?= $value ?>" <?= $actividad['estado']===$value?'selected':'' ?>><?= $label ?></option><?php endforeach; ?></select></div>
+<p>Publicar permite mostrar sus ediciones visibles. Pasar a borrador o archivar oculta la actividad en la web. Revisá también el estado de cada edición.</p>
+</div><footer class="activity-editor-actions"><a class="activity-action-secondary" href="/admin/actividades/editar.php?id=<?= (int)$actividadId ?>">Ir a ediciones</a><button type="submit" class="activity-action-primary">Guardar actividad</button></footer></section></form>
 
 
     <?php else: ?>
@@ -430,8 +359,7 @@ require __DIR__ . '/../includes/header.php';
                                 </strong>
 
                                 <span>
-                                    <?= (int) $edicion['cupo_maximo'] ?>
-                                    cupos
+                                    <?= $edicion['cupo_maximo'] === null ? 'Sin límite de cupo' : (int)$edicion['cupo_maximo'] . ' cupos' ?>
                                 </span>
 
                             </div>

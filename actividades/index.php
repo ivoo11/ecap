@@ -416,7 +416,7 @@ if (!empty($actividad['imagen_portada'])) {
             </a>
 
         <?php elseif (
-            !$hayCupo ||
+            ($actividad['estado'] === 'inscripcion_abierta' && !$hayCupo) ||
             $actividad['estado'] === 'cupo_completo'
         ): ?>
 

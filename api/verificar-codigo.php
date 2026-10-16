@@ -188,6 +188,24 @@ try {
 
     $pdo->beginTransaction();
 
+    // Serializar la admisión con los otros caminos que bloquean la edición.
+    $stmtEdicion = $pdo->prepare("
+        SELECT id, estado, cupo_maximo, fecha_inicio
+        FROM ediciones WHERE id = ? FOR UPDATE
+    ");
+    $stmtEdicion->execute([$verificacion['edicion_id']]);
+    $edicionActual = $stmtEdicion->fetch(PDO::FETCH_ASSOC);
+    if (!$edicionActual || $edicionActual['estado'] !== 'inscripcion_abierta'
+        || strtotime($edicionActual['fecha_inicio']) <= time()) {
+        throw new DomainException('La inscripción ya no está disponible.');
+    }
+    $stmtPersona = $pdo->prepare('SELECT estado FROM personas WHERE id = ?');
+    $stmtPersona->execute([$verificacion['persona_id']]);
+    if ($stmtPersona->fetchColumn() !== 'activo') {
+        throw new DomainException('El perfil no está activo.');
+    }
+
+
 
     /* =====================================================
        MARCAR VERIFICACIÓN COMO UTILIZADA
@@ -199,6 +217,8 @@ try {
         WHERE
             id = :id
             AND verificado_en IS NULL
+          AND expira_en >= NOW()
+          AND intentos < 5
     ");
 
     $stmt->execute([
@@ -235,6 +255,16 @@ try {
     ]);
 
     $inscripcion = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ((!$inscripcion || $inscripcion['estado'] !== 'confirmada')
+        && $edicionActual['cupo_maximo'] !== null) {
+        $stmtCupo = $pdo->prepare("SELECT COUNT(*) FROM inscripciones WHERE edicion_id = ? AND estado = 'confirmada'");
+        $stmtCupo->execute([$verificacion['edicion_id']]);
+        if ((int) $stmtCupo->fetchColumn() >= (int) $edicionActual['cupo_maximo']) {
+            throw new DomainException('La actividad alcanzó el cupo máximo.');
+        }
+    }
+
 
 
     /* =====================================================
@@ -289,6 +319,12 @@ try {
 
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
+    }
+
+    if ($e instanceof DomainException) {
+        http_response_code(409);
+        echo json_encode(['ok' => false, 'message' => $e->getMessage()]);
+        exit;
     }
 
     error_log(

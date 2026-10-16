@@ -11,3 +11,12 @@
 
 # Logs
 *.log
+
+# Herramientas y estructura exclusivas del entorno local
+/dev/
+/database/schema.local-baseline.sql
+/database/seeds/local.php
+
+# Imágenes cargadas por el administrador (persisten fuera del código)
+/assets/img/actividades/ecap-*.png
+/assets/img/docentes/ecap-*.png

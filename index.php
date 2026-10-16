@@ -692,7 +692,7 @@ function imagenActividad(?string $imagen): ?string
                                 $estadoClase = 'is-running';
 
                             } elseif (
-                                !$hayCupo ||
+                                ($estadoEdicion === 'inscripcion_abierta' && !$hayCupo) ||
                                 $estadoEdicion === 'cupo_completo'
                             ) {
 

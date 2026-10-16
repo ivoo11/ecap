@@ -4,16 +4,9 @@ declare(strict_types=1);
 
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 
-$entorno = getenv('ECAP_ENV');
+require_once __DIR__ . '/Environment.php';
 
-$isLocal =
-    $entorno === 'local'
-    ||
-    in_array(
-        $_SERVER['SERVER_NAME'] ?? '',
-        ['localhost', '127.0.0.1'],
-        true
-    );
+$isLocal = Environment::isLocal();
 
 $configFile = $isLocal
     ? __DIR__ . '/database.local.php'
@@ -25,6 +18,16 @@ if (!is_file($configFile)) {
 }
 
 $config = require $configFile;
+
+if ($isLocal && (
+    ($config['host'] ?? '') !== '127.0.0.1'
+    || (int) ($config['port'] ?? 0) !== 8889
+    || ($config['name'] ?? '') !== 'ecap_dev'
+    || ($config['user'] ?? '') !== 'ecap_dev'
+)) {
+    throw new RuntimeException('Destino de desarrollo no autorizado.');
+}
+
 
 $dsn = sprintf(
     'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',

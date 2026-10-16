@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../app/config/Environment.php';
+
 final class ReachService
 {
     private const FIELD_AMBITO = '184de0f0-85ea-41f5-ae43-67e7f159a64a';
@@ -30,6 +32,10 @@ final class ReachService
 
     public function __construct()
     {
+        if (Environment::isLocal()) {
+            throw new RuntimeException('Reach está bloqueado en desarrollo local.');
+        }
+
         $configPath = dirname(__DIR__, 2) . '/ecap_private/reach.php';
 
         if (!is_file($configPath)) {

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/bootstrap.php';
+require_once __DIR__ . '/../../app/services/AdminForm.php';
 
 $pageTitle = 'Nueva actividad';
 $pageSection = 'actividades';
@@ -70,22 +71,10 @@ function generarSlugActividad(string $texto): string
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    if (!Csrf::validate($_POST['_csrf'] ?? '')) {
-        $errores[] = 'La sesión del formulario venció. Volvé a intentarlo.';
-    }
-
-    $valores['tipo_actividad_id'] =
-        trim((string) ($_POST['tipo_actividad_id'] ?? ''));
-
-    $valores['titulo'] =
-        trim((string) ($_POST['titulo'] ?? ''));
-
-    $valores['descripcion'] =
-        trim((string) ($_POST['descripcion'] ?? ''));
-
-    $valores['programa'] =
-        trim((string) ($_POST['programa'] ?? ''));
-
+    AdminForm::csrf();
+    foreach ($valores as $key => $_) $valores[$key] = AdminForm::text($key);
+    if (mb_strlen($valores['titulo']) > 255) $errores[] = 'El título debe tener hasta 255 caracteres.';
+    foreach (['descripcion','programa'] as $key) if (strlen($valores[$key]) > 65535) $errores[] = 'La descripción o el programa son demasiado extensos.';
 
     if ($valores['tipo_actividad_id'] === '') {
         $errores[] = 'Seleccioná un tipo de actividad.';
@@ -130,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$errores) {
 
-        $slugBase = generarSlugActividad($valores['titulo']);
+        $slugBase = substr(generarSlugActividad($valores['titulo']), 0, 230);
         $slug = $slugBase;
         $contador = 2;
 
