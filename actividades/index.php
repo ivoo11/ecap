@@ -10,6 +10,15 @@ require_once __DIR__ . '/../app/services/EstadoEdiciones.php';
    HELPERS
    ========================================================= */
 
+function parrafosActividad(string $texto): string
+{
+    $parrafos = preg_split('/\R+/u', trim($texto)) ?: [];
+    return implode("\n", array_map(
+        static fn(string $parrafo): string => '<p>' . htmlspecialchars($parrafo, ENT_QUOTES, 'UTF-8') . '</p>',
+        array_filter($parrafos, static fn(string $parrafo): bool => trim($parrafo) !== '')
+    ));
+}
+
 function modalidadLabel(string $modalidad): string
 {
     return match ($modalidad) {
@@ -496,7 +505,8 @@ if (!empty($actividad['imagen_portada'])) {
                         }
                     ?>
 
-                    <article class="activity-bio">
+                    <article class="activity-bio <?= $fotoDocente ? 'activity-bio--with-photo' : 'activity-bio--text-only' ?>">
+                        <div class="activity-bio-copy">
 
                         <?php if (count($docentes) > 1): ?>
 
@@ -513,14 +523,11 @@ if (!empty($actividad['imagen_portada'])) {
 
                         <?php if (!empty($docente['bio'])): ?>
 
-                            <p>
-                                <?= nl2br(
-                                    htmlspecialchars($docente['bio'])
-                                ) ?>
-                            </p>
+                            <?= parrafosActividad($docente['bio']) ?>
 
                         <?php endif; ?>
 
+                        </div>
                         <?php if ($fotoDocente): ?>
 
                         <div class="activity-bio-photo">
@@ -564,9 +571,7 @@ if (!empty($actividad['imagen_portada'])) {
                 </h2>
 
                 <div class="detail-body">
-                    <?= nl2br(
-                        htmlspecialchars($actividad['descripcion'])
-                    ) ?>
+                    <?= parrafosActividad($actividad['descripcion']) ?>
                 </div>
 
             </div>
