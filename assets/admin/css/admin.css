@@ -3569,33 +3569,26 @@ a {
 }
 /* Cambio de inscripción desde el listado. */
 .admin-quick-state {
-    display: grid;
-    grid-template-columns: minmax(140px, 1fr) 36px;
-    gap: 4px 6px;
-    min-width: 182px;
+    display: inline-grid;
+    grid-template-columns: max-content 32px;
+    gap: 4px;
     align-items: center;
 }
-.admin-quick-state label { grid-column: 1 / -1; font-size: .75rem; color: #64748b; }
+.admin-quick-state label { grid-column: 1 / -1; font-size: .75rem; color: var(--admin-text-muted); }
 .admin-quick-state .admin-select {
+    width: auto;
     min-width: 0;
-    width: 100%;
-    min-height: 36px;
-    padding: 6px 24px 6px 12px;
-    border: 1px solid transparent;
-    border-radius: 999px;
-    background-color: rgba(16, 29, 48, 0.07);
-    color: var(--admin-text);
-    font: inherit;
-    font-size: 13px;
-    font-weight: 600;
+    min-height: 32px;
+    padding: 4px 9px;
+    border-color: transparent;
     cursor: pointer;
 }
 .admin-quick-state__save {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     padding: 0;
     border: 1px solid transparent;
     border-radius: 50%;
@@ -3608,7 +3601,7 @@ a {
 .admin-quick-state .admin-select:focus-visible { outline: 2px solid var(--admin-text); outline-offset: 2px; }
 .admin-table td > small { display: block; margin-top: 6px; }
 @media (pointer: coarse) {
-    .admin-quick-state { grid-template-columns: minmax(140px, 1fr) 44px; }
+    .admin-quick-state { grid-template-columns: max-content 44px; }
     .admin-quick-state .admin-select { min-height: 44px; }
     .admin-quick-state__save { width: 44px; height: 44px; }
 }

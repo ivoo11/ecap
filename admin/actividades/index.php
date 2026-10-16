@@ -262,7 +262,7 @@ require __DIR__ . '/../includes/header.php';
                                 <input type="hidden" name="edicion_id" value="<?= (int)$actividad['edicion_id'] ?>">
                                 <input type="hidden" name="estado_anterior" value="<?= AdminForm::escape($actividad['edicion_estado']) ?>">
                                 <label for="estado-<?= (int)$actividad['edicion_id'] ?>">Inscripciones</label>
-                                <select class="admin-select" name="estado" id="estado-<?= (int)$actividad['edicion_id'] ?>" aria-label="<?= AdminForm::escape('Inscripciones: '.$actividad['titulo']) ?>">
+                                <select class="admin-select admin-status" name="estado" id="estado-<?= (int)$actividad['edicion_id'] ?>" aria-label="<?= AdminForm::escape('Inscripciones: '.$actividad['titulo']) ?>">
                                 <?php foreach ($estadosInscripcion as $value=>$label): ?><option value="<?= $value ?>" <?= ($actividad['edicion_estado']==='cupo_completo'?'inscripcion_abierta':$actividad['edicion_estado'])===$value?'selected':'' ?>><?= $label ?></option><?php endforeach; ?>
                                 </select>
                                 <button type="submit" class="admin-quick-state__save" aria-label="<?= AdminForm::escape('Guardar inscripciones: '.$actividad['titulo']) ?>" title="Guardar estado">
