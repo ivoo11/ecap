@@ -347,54 +347,8 @@ try {
    ========================================================= */
 
 try {
-
-    $stmt = $pdo->prepare("
-        SELECT
-            p.nombre,
-            p.email,
-            a.titulo,
-            e.fecha_inicio,
-            e.modalidad,
-            e.zoom_url,
-            e.zoom_meeting_id,
-            e.zoom_passcode
-        FROM personas p
-        INNER JOIN ediciones e
-            ON e.id = :edicion_id
-        INNER JOIN actividades a
-            ON a.id = e.actividad_id
-        WHERE p.id = :persona_id
-        LIMIT 1
-    ");
-
-    $stmt->execute([
-        'persona_id' => $verificacion['persona_id'],
-        'edicion_id' => $verificacion['edicion_id']
-    ]);
-
-    $datosMail = $stmt->fetch(PDO::FETCH_ASSOC);
-
-
-    if (!$datosMail) {
-        throw new RuntimeException(
-            'No se encontraron los datos para el email.'
-        );
-    }
-
-
-    $mailService = new MailService();
-
-    $mailService->enviarConfirmacionInscripcion(
-        (string) $datosMail['email'],
-        (string) $datosMail['nombre'],
-        (string) $datosMail['titulo'],
-        (string) $datosMail['fecha_inicio'],
-        (string) $datosMail['modalidad'],
-        (string) ($datosMail['zoom_url'] ?? ''),
-        (string) ($datosMail['zoom_meeting_id'] ?? ''),
-        (string) ($datosMail['zoom_passcode'] ?? '')
-    );
-
+    require_once __DIR__.'/../app/services/InscripcionService.php';
+    (new InscripcionService($pdo))->enviarConfirmacion((int)$verificacion['persona_id'],(int)$verificacion['edicion_id']);
 
 } catch (Throwable $e) {
 

@@ -360,6 +360,8 @@ function fechaEdicionAdmin(string $fecha): string
 $pageTitle = 'Alumnos';
 $pageSection = 'actividades';
 
+require_once __DIR__.'/../../../app/services/CorreoControl.php';
+$correosAtencion=count((new CorreoControl($pdo))->pendientes((int)$edicionId));
 require __DIR__ . '/../../includes/header.php';
 
 ?>
@@ -439,6 +441,7 @@ require __DIR__ . '/../../includes/header.php';
             Alumnos
         </span>
 
+        <a class="edition-admin-nav__item" href="/admin/correos/?edicion=<?= (int)$edicionId ?>">Correos<?= $correosAtencion ? ' ('.$correosAtencion.')' : '' ?></a>
         <span class="edition-admin-nav__item">
             Materiales
         </span>

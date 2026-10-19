@@ -10,6 +10,10 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/bootstrap.php';
 
+require_once __DIR__.'/../app/services/CorreoControl.php';
+$correoControl=new CorreoControl($pdo);
+$correosPendientes=$correoControl->pendientes();
+$cronCorreo=$correoControl->cron();
 $pageTitle = 'Inicio';
 $pageSection = 'inicio';
 
@@ -37,6 +41,12 @@ require __DIR__ . '/includes/header.php';
 
     </header>
 
+    <section class="admin-card correo-cron">
+        <h2>Correos automáticos</h2>
+        <p><?= count($correosPendientes) ? count($correosPendientes).' correos requieren atención.' : 'Sin correos pendientes de atención para actividades vigentes.' ?></p>
+        <?php if ($cronCorreo['alerta']): ?><p><strong>Revisar recordatorios: no hay una ejecución completada hoy.</strong></p><?php endif; ?>
+        <a class="activity-action-secondary" href="/admin/correos/">Ver control de correos</a>
+    </section>
     <div class="admin-dashboard">
 
         <a

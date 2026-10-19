@@ -261,49 +261,11 @@ final class InscripcionService
         int $edicionId
     ): void {
 
-        $stmt = $this->pdo->prepare("
-            SELECT
-                p.nombre,
-                p.email,
-                a.titulo,
-                e.fecha_inicio,
-                e.modalidad,
-                e.zoom_url,
-                e.zoom_meeting_id,
-                e.zoom_passcode
-            FROM personas p
-            INNER JOIN ediciones e
-                ON e.id = :edicion_id
-            INNER JOIN actividades a
-                ON a.id = e.actividad_id
-            WHERE p.id = :persona_id
-            LIMIT 1
-        ");
-
-        $stmt->execute([
-            'persona_id' => $personaId,
-            'edicion_id' => $edicionId,
-        ]);
-
-        $datos = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$datos) {
-            throw new RuntimeException(
-                'No se encontraron los datos necesarios para enviar la confirmación.'
-            );
-        }
-
-        $mailService = new MailService();
-
-        $mailService->enviarConfirmacionInscripcion(
-            (string) $datos['email'],
-            (string) $datos['nombre'],
-            (string) $datos['titulo'],
-            (string) $datos['fecha_inicio'],
-            (string) $datos['modalidad'],
-            (string) ($datos['zoom_url'] ?? ''),
-            (string) ($datos['zoom_meeting_id'] ?? ''),
-            (string) ($datos['zoom_passcode'] ?? '')
-        );
+        require_once __DIR__.'/CorreoControl.php';
+        $q=$this->pdo->prepare('SELECT id FROM inscripciones WHERE persona_id=? AND edicion_id=?');
+        $q->execute([$personaId,$edicionId]);
+        $id=$q->fetchColumn();
+        if(!$id)throw new DomainException('Inscripción no encontrada.');
+        (new CorreoControl($this->pdo))->enviar((int)$id);
     }
 }

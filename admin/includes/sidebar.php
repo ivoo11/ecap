@@ -144,9 +144,7 @@ declare(strict_types=1);
                 Comunicaciones
             </span>
 
-            <span class="admin-nav__item is-disabled">
-                Correos transaccionales
-            </span>
+            <a href="/admin/correos/" class="admin-nav__item <?= $pageSection === 'correos' ? 'is-active' : '' ?>">Control de correos</a>
 
             <span class="admin-nav__item is-disabled">
                 Recordatorios
