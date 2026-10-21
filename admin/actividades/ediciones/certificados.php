@@ -28,7 +28,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         try{
             if(!$lote || $lote['edicion']!==$id || $lote['vence']<time() || !isset($lote['personas'][$ins]))throw new DomainException('La selección venció. Revisá los participantes nuevamente.');
             if(isset($lote['resultados'][$ins])){echo json_encode($lote['resultados'][$ins]);exit;}
-            $sent=$service->enviar($id,$ins,(int)$usuario['id'],$lote['personas'][$ins],$lote['revision']);
+            $sent=$service->enviar($id,$ins,(int)Auth::id(),$lote['personas'][$ins],$lote['revision']);
             $result=['ok'=>true,'mensaje'=>$sent?'Correo aceptado por el servidor':'Ya estaba enviado'];
         }catch(Throwable $e){error_log('ECAP certificados: '.$e->getMessage());$result=['ok'=>false,'mensaje'=>$e instanceof DomainException?$e->getMessage():'No se pudo completar. Revisá el estado antes de reintentar.'];}
         if($lote && $lote['edicion']===$id && isset($lote['personas'][$ins]))$_SESSION['certificado_lotes'][$token]['resultados'][$ins]=$result;
@@ -39,7 +39,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             $newFile=null;
             if(($_FILES['fondo']['error']??UPLOAD_ERR_NO_FILE)!==UPLOAD_ERR_NO_FILE)$newFile=CertificadoPdf::upload($_FILES['fondo']);
             $d=['encabezado'=>AdminForm::text('encabezado'),'titulo'=>AdminForm::text('titulo'),'fondo'=>$newFile?:$config['fondo'],'aprobado'=>isset($_POST['aprobado'])?1:0];
-            try{$service->guardar($id,$d,(int)$usuario['id'],(int)AdminForm::text('revision'));}
+            try{$service->guardar($id,$d,(int)Auth::id(),(int)AdminForm::text('revision'));}
             catch(Throwable $e){if($newFile)@unlink(CertificadoPdf::file($newFile));throw $e;}
             header('Location: certificados.php?id='.$id.'&guardado=1');exit;
         }

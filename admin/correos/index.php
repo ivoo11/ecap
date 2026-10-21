@@ -16,7 +16,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   if(AdminForm::text('accion')==='enviar'){
    // Confirmar sobre la versión mostrada, para no enviar a una dirección que cambió.
    if(!hash_equals(hash('sha256',$confirmar['email']),AdminForm::text('destino')))throw new DomainException('La dirección cambió. Revisala antes de reintentar.');
-   $control->enviar($id,$clase?:null,'manual',(int)$usuario['id']);
+   $control->enviar($id,$clase?:null,'manual',(int)Auth::id());
    header('Location: /admin/correos/?'.http_build_query(array_filter(['edicion'=>$edicion,'guardado'=>1])));exit;
   }
  }catch(Throwable $e){$error=$e instanceof DomainException?$e->getMessage():'No se pudo completar la operación. El resultado queda pendiente de revisión.';$confirmar=null;}

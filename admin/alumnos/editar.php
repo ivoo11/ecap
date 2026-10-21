@@ -1,0 +1,32 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__.'/../includes/bootstrap.php';
+require_once __DIR__.'/../../app/services/AdminForm.php';
+require_once __DIR__.'/../../app/services/AlumnoService.php';
+$id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT)?:0;$service=new AlumnoService($pdo);
+try{$p=$service->obtener($id);}catch(DomainException $e){http_response_code(404);exit('Persona no encontrada.');}
+$values=$p;$version=AlumnoService::version($p);$error=null;$canEdit=!$service->protegida($id) || Auth::hasRole('superadmin');
+if($_SERVER['REQUEST_METHOD']==='POST'){
+    AdminForm::csrf();$version=AdminForm::text('version');
+    foreach(['nombre','apellido','dni','email','telefono'] as $field)$values[$field]=AdminForm::text($field);
+    try{
+        $changed=$service->guardar($id,array_intersect_key($values,array_flip(['nombre','apellido','dni','email','telefono'])),$version,(int)Auth::id());
+        if($id===(int)$usuario['persona_id'])foreach(['nombre','apellido','dni','email'] as $key)$_SESSION['auth'][$key]=$values[$key];
+        header('Location: editar.php?id='.$id.'&guardado='.($changed?'1':'0'));exit;
+    }catch(Throwable $e){$error=$e instanceof DomainException?$e->getMessage():'No se pudieron guardar los cambios. Ningún dato fue modificado.';error_log('ECAP alumnos: '.$e->getMessage());}
+}
+$stmt=$pdo->prepare('SELECT i.estado,i.inscripto_en,e.id AS edicion_id,e.fecha_inicio,a.titulo,c.estado AS certificado_estado FROM inscripciones i JOIN ediciones e ON e.id=i.edicion_id JOIN actividades a ON a.id=e.actividad_id LEFT JOIN certificados c ON c.inscripcion_id=i.id WHERE i.persona_id=? ORDER BY e.fecha_inicio DESC');$stmt->execute([$id]);$inscripciones=$stmt->fetchAll();
+$stmt=$pdo->prepare("SELECT au.creado_en,au.detalle,p.nombre,p.apellido FROM auditoria au LEFT JOIN usuarios u ON u.id=au.usuario_id LEFT JOIN personas p ON p.id=u.persona_id WHERE au.entidad='personas' AND au.entidad_id=? AND au.accion='actualizar_datos' ORDER BY au.id DESC LIMIT 10");$stmt->execute([$id]);$history=$stmt->fetchAll();
+$pageTitle='Ficha de alumno';$pageSection='alumnos';require __DIR__.'/../includes/header.php';
+?>
+<section class="admin-page alumno-page"><header class="admin-page__header"><div><h1><?= AdminForm::escape($p['nombre'].' '.$p['apellido']) ?></h1><p>DNI <?= AdminForm::escape($p['dni']) ?> · <?= count($inscripciones) ?> inscripciones</p></div><a class="activity-action-secondary" href="/admin/alumnos/">Volver a alumnos</a></header>
+<?php if($error):?><div class="admin-alert admin-alert--error" role="alert"><?= AdminForm::escape($error) ?></div><?php endif;?>
+<?php if(isset($_GET['guardado'])):?><div class="edition-message edition-message--success" role="status"><?= $_GET['guardado']==='1'?'Datos actualizados. No se envió ningún correo.':'No había cambios para guardar.' ?></div><?php endif;?>
+<section class="admin-card"><h2>Datos personales</h2><?php if(!$canEdit):?><p>Este perfil tiene acceso administrativo. Solo un superadministrador puede modificarlo.</p><?php endif;?>
+<form method="post"><?= Csrf::field() ?><input type="hidden" name="version" value="<?= AdminForm::escape($version) ?>"><fieldset class="alumno-form" <?= !$canEdit?'disabled':'' ?>>
+<?php foreach(['nombre'=>'Nombre','apellido'=>'Apellido','dni'=>'DNI','email'=>'Correo electrónico','telefono'=>'Teléfono'] as $field=>$label):?><label><?= $label ?><input class="admin-input" name="<?= $field ?>" type="<?= $field==='email'?'email':'text' ?>" value="<?= AdminForm::escape($values[$field]??'') ?>" maxlength="<?= ['nombre'=>100,'apellido'=>100,'dni'=>8,'email'=>190,'telefono'=>50][$field] ?>" <?= $field==='telefono'?'':'required' ?> <?= $field==='dni'?'inputmode="numeric" pattern="[0-9]{7,8}"':'' ?>></label><?php endforeach;?>
+</fieldset><p class="admin-text-muted">El correo actualizado se usará en los próximos envíos. Los mensajes anteriores y los certificados emitidos conservan su historial. Cambiar el DNI también cambia el dato con el que la persona ingresa.</p>
+<?php if($canEdit):?><button class="admin-button" type="submit">Guardar cambios</button><?php endif;?></form></section>
+<section class="admin-card"><h2>Inscripciones</h2><?php if(!$inscripciones):?><p>Todavía no tiene inscripciones registradas.</p><?php else:?><div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Actividad</th><th>Inscripción</th><th>Certificado</th><th></th></tr></thead><tbody><?php foreach($inscripciones as $i):?><tr><td data-label="Actividad"><strong><?= AdminForm::escape($i['titulo']) ?></strong><small><?= date('d/m/Y H:i',strtotime($i['fecha_inicio'])) ?></small></td><td data-label="Inscripción"><span class="admin-status"><?= AdminForm::escape(ucfirst($i['estado'])) ?></span></td><td data-label="Certificado"><?= $i['certificado_estado']?AdminForm::escape(ucfirst($i['certificado_estado'])):'Sin emitir' ?></td><td><a class="activity-action-secondary" href="/admin/actividades/ediciones/editar.php?id=<?= (int)$i['edicion_id'] ?>">Ver edición</a></td></tr><?php endforeach;?></tbody></table></div><?php endif;?></section>
+<?php if($history):?><details class="admin-card"><summary>Últimos cambios de datos</summary><?php foreach($history as $h):$detail=json_decode($h['detalle']??'',true);?><div class="alumno-history"><strong><?= date('d/m/Y H:i',strtotime($h['creado_en'])) ?> · <?= AdminForm::escape(trim(($h['nombre']??'').' '.($h['apellido']??''))?:'Usuario no disponible') ?></strong><?php foreach(($detail['cambios']??[]) as $key=>$change):?><p><?= AdminForm::escape(['nombre'=>'Nombre','apellido'=>'Apellido','dni'=>'DNI','email'=>'Correo','telefono'=>'Teléfono'][$key]??$key) ?>: <?= AdminForm::escape($change['antes']??'—') ?> → <?= AdminForm::escape($change['despues']??'—') ?></p><?php endforeach;?></div><?php endforeach;?></details><?php endif;?>
+</section><?php require __DIR__.'/../includes/footer.php';?>
