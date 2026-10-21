@@ -82,8 +82,15 @@ final class CorreoControl
         LEFT JOIN comunicaciones_transaccionales ct ON ct.inscripcion_id=i.id AND ct.clase_id=c.id AND ct.tipo='recordatorio_clase'
         WHERE cc.id=1 AND i.estado='confirmada' AND e.estado NOT IN ('borrador','cancelada','finalizada') AND DATE(c.fecha_inicio)=CURDATE() AND c.fecha_inicio>NOW()
         AND (ct.estado='error' OR (ct.estado='pendiente' AND COALESCE(ct.ultimo_intento_en,ct.creado_en)<=DATE_SUB(NOW(),INTERVAL 5 MINUTE)) OR (ct.id IS NULL AND TIME(NOW())>='07:40:00' AND cc.desde<=TIMESTAMP(CURDATE(),'07:00:00') AND i.inscripto_en<=TIMESTAMP(CURDATE(),'07:30:00')))
+        AND (? IS NULL OR i.edicion_id=?)
+        UNION ALL
+        SELECT i.id,NULL,'certificado',p.nombre,p.apellido,p.email,a.titulo,i.edicion_id,e.fecha_inicio,ct.id,ct.estado,ct.intentos,ct.ultimo_intento_en,
+        EXISTS(SELECT 1 FROM correo_intentos ci WHERE ci.comunicacion_id=ct.id AND ci.resultado='incierto')
+        FROM comunicaciones_transaccionales ct JOIN inscripciones i ON i.id=ct.inscripcion_id JOIN personas p ON p.id=i.persona_id JOIN ediciones e ON e.id=i.edicion_id JOIN actividades a ON a.id=e.actividad_id JOIN certificados cert ON cert.inscripcion_id=i.id
+        WHERE ct.tipo='certificado' AND cert.estado='emitido'
+        AND (ct.estado='error' OR (ct.estado='pendiente' AND COALESCE(ct.ultimo_intento_en,ct.creado_en)<=DATE_SUB(NOW(),INTERVAL 5 MINUTE)))
         AND (? IS NULL OR i.edicion_id=?) ORDER BY fecha,apellido,nombre";
-        $q=$this->pdo->prepare($sql);$q->execute([$edicion,$edicion,$edicion,$edicion]);return $q->fetchAll();
+        $q=$this->pdo->prepare($sql);$q->execute([$edicion,$edicion,$edicion,$edicion,$edicion,$edicion]);return $q->fetchAll();
     }
 
     public function cron(): array

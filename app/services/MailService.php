@@ -778,4 +778,28 @@ class MailService
 
         $mail->send();
     }
+    public function enviarCertificado(string $email,string $nombre,string $titulo,string $archivo): void
+    {
+        if(!is_file($archivo) || !is_readable($archivo))throw new RuntimeException('Certificado no disponible.');
+        $mail=$this->crearMailer();
+        $mail->addEmbeddedImage(__DIR__.'/../../assets/img/headermail.png','ecap_header','headermail.png');
+        $mail->addAddress($email,$nombre);
+        $mail->addAttachment($archivo,'Certificado-ECAP.pdf','base64','application/pdf');
+        $mail->isHTML(true);$mail->Subject='Tu certificado | ECAP';
+        $n=htmlspecialchars($nombre,ENT_QUOTES,'UTF-8');$t=htmlspecialchars($titulo,ENT_QUOTES,'UTF-8');
+        $mail->Body=<<<HTML
+        <div style="max-width:600px;margin:0 auto;padding:40px 24px;font-family:Arial,Helvetica,sans-serif;color:#101d30;">
+          <img src="cid:ecap_header" alt="ECAP" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:8px;margin:0 0 32px;">
+          <h1 style="margin:0 0 18px;font-size:30px;line-height:1.2;">Tu certificado</h1>
+          <p style="font-size:16px;line-height:1.6;color:#555b64;">Hola {$n}:</p>
+          <p style="font-size:16px;line-height:1.6;color:#555b64;">Gracias por participar en:</p>
+          <div style="padding:24px 0;margin:24px 0;border-top:1px solid #e3e5e8;border-bottom:1px solid #e3e5e8;"><h2 style="margin:0;font-size:21px;line-height:1.4;">{$t}</h2></div>
+          <p style="font-size:16px;line-height:1.6;color:#555b64;">Adjuntamos tu certificado en PDF para que puedas descargarlo y conservarlo.</p>
+          <p style="font-size:16px;line-height:1.6;color:#555b64;margin-bottom:32px;">Esperamos encontrarte en nuestras próximas actividades.</p>
+          <p style="font-size:13px;line-height:1.6;color:#858a91;"><strong>Equipo ECAP</strong><br>Escuela de Capacitación de la Abogacía Pública</p>
+        </div>
+        HTML;
+        $mail->AltBody="Hola {$nombre}:\n\nGracias por participar en {$titulo}.\n\nAdjuntamos tu certificado en PDF para que puedas descargarlo y conservarlo.\n\nEsperamos encontrarte en nuestras próximas actividades.\n\nEquipo ECAP\nEscuela de Capacitación de la Abogacía Pública";
+        if(!$mail->send())throw new RuntimeException('El servidor no confirmó el correo.');
+    }
 }

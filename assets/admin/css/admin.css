@@ -3626,3 +3626,25 @@ a {
     .correo-page td[data-label="Acción"]::before { display: none; }
     .correo-page td button { min-height: 44px; }
 }
+
+/* Certificados: componentes existentes y distribución adaptable. */
+.certificado-page .admin-card {margin-bottom:24px;}
+.certificado-config {display:grid;gap:22px;margin-top:24px;max-width:840px;}
+.certificado-config label,.certificado-toolbar label {display:grid;gap:8px;font-weight:600;}
+.certificado-config input:not([type=checkbox]),.certificado-config textarea,.certificado-toolbar input {width:100%;box-sizing:border-box;border:1px solid #dfe3e8;border-radius:10px;padding:12px 14px;background:#fff;color:#101d30;font:inherit;}
+.certificado-config small,.certificado-page td small {display:block;font-weight:400;color:#697586;line-height:1.5;}
+.certificado-page .certificado-check {display:flex;align-items:center;gap:10px;font-weight:400;}
+.certificado-page input[type=checkbox] {width:20px;height:20px;accent-color:#101d30;cursor:pointer;flex-shrink:0;}
+.certificado-actions,.certificado-toolbar {display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:20px 0;}
+.certificado-toolbar {justify-content:space-between;align-items:flex-start;}
+.certificado-page button:disabled {opacity:.5;cursor:not-allowed;}
+.certificado-page summary {cursor:pointer;padding:8px 0;}
+.certificado-page td {white-space:normal;}
+.certificado-page [hidden] {display:none!important;}
+@media(max-width:640px){.certificado-actions {align-items:stretch;flex-direction:column;}.certificado-toolbar label {width:100%;}.certificado-page .admin-table {min-width:720px;}.certificado-page .admin-table-wrapper {overflow-x:auto;}.certificado-page .activity-action-secondary {min-height:44px;display:inline-flex;align-items:center;}.certificado-page .admin-card {padding:20px;}}
+
+@media(max-width:640px){
+.certificado-page .admin-table{min-width:0;display:block;}.certificado-page .admin-table thead{display:none;}.certificado-page .admin-table tbody{display:grid;gap:16px;}.certificado-page .admin-table tr{display:grid;border:1px solid #dfe3e8;border-radius:12px;padding:14px;}.certificado-page .admin-table td{display:block;border:0;padding:6px 0;}.certificado-page .admin-table td[data-label]::before{content:attr(data-label);display:block;font-size:12px;color:#697586;margin-bottom:4px;}.certificado-page td small{overflow-wrap:anywhere;}
+}
+
+@media(max-width:480px){body:has(.certificado-page) .admin-topbar__identity{display:none;}}

@@ -9,7 +9,7 @@ $pendientes=$control->pendientes($edicion);
 if($_SERVER['REQUEST_METHOD']==='POST'){
  AdminForm::csrf();
  $id=(int)AdminForm::text('inscripcion');$clase=(int)AdminForm::text('clase');
- foreach($pendientes as $p)if((int)$p['inscripcion_id']===$id && (int)$p['clase_id']===$clase)$confirmar=$p;
+ foreach($pendientes as $p)if($p['tipo']!=='certificado' && (int)$p['inscripcion_id']===$id && (int)$p['clase_id']===$clase)$confirmar=$p;
  try{
   if(!$confirmar)throw new DomainException('El correo ya no requiere atención. Actualizá la página.');
   if($confirmar['incierto'])throw new DomainException('El resultado es incierto. Revisá el servidor de correo antes de reenviar.');
@@ -26,7 +26,7 @@ $cron=$control->cron();$pageTitle='Correos';$pageSection='correos';
 require __DIR__.'/../includes/header.php';
 ?>
 <section class="admin-page correo-page">
-<header class="admin-page__header"><div><h1>Control de correos</h1><p><?= count($pendientes) ?> correos requieren atención · Confirmaciones y recordatorios.</p></div><?php if($edicion): ?><a class="activity-action-secondary" href="/admin/actividades/ediciones/editar.php?id=<?= $edicion ?>">Volver a la edición</a><?php endif; ?></header>
+<header class="admin-page__header"><div><h1>Control de correos</h1><p><?= count($pendientes) ?> correos requieren atención · Confirmaciones, recordatorios y certificados.</p></div><?php if($edicion): ?><a class="activity-action-secondary" href="/admin/actividades/ediciones/editar.php?id=<?= $edicion ?>">Volver a la edición</a><?php endif; ?></header>
 <?php if($error): ?><div class="admin-alert admin-alert--error" role="alert"><?= AdminForm::escape($error) ?></div><?php endif; ?>
 <?php if(isset($_GET['guardado'])): ?><div class="edition-message edition-message--success" role="status">El servidor aceptó el correo. Ya no requiere atención.</div><?php endif; ?>
 <?php if($confirmar): ?>
@@ -36,7 +36,7 @@ require __DIR__.'/../includes/header.php';
 <?php else: ?>
 <div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Persona / Actividad</th><th>Correo</th><th>Situación</th><th>Acción</th></tr></thead><tbody>
 <?php foreach($pendientes as $p): $incierto=(bool)$p['incierto']; $reciente=$incierto && strtotime($p['ultimo_intento_en']??'')>time()-300; ?>
-<tr><td><strong><?= AdminForm::escape($p['nombre'].' '.$p['apellido']) ?></strong><small><?= AdminForm::escape($p['email']) ?></small><small><?= AdminForm::escape($p['titulo']) ?></small></td><td data-label="Correo"><?= $p['clase_id']?'Recordatorio':'Confirmación' ?><small><?= AdminForm::escape(date('d/m/Y H:i',strtotime($p['fecha']))) ?></small></td><td data-label="Situación"><span class="admin-status <?= $p['estado']==='error'?'correo-status--error':'' ?>"><?= $reciente?'En proceso':($incierto?'Resultado incierto':($p['estado']==='error'?'Falló el envío':'Sin envío registrado')) ?></span><small><?= $p['ultimo_intento_en']?'Último intento: '.AdminForm::escape(date('d/m H:i',strtotime($p['ultimo_intento_en']))):'No se registró un intento.' ?></small></td><td data-label="Acción"><?php if(!$incierto): ?><form method="post"><?= Csrf::field() ?><input type="hidden" name="inscripcion" value="<?= (int)$p['inscripcion_id'] ?>"><input type="hidden" name="clase" value="<?= (int)$p['clase_id'] ?>"><button class="activity-action-secondary" type="submit">Reintentar</button></form><?php else: ?><span class="admin-text-muted"><?= $reciente?'Actualizá en unos minutos':'Revisar servidor' ?></span><?php endif; ?></td></tr>
+<tr><td><strong><?= AdminForm::escape($p['nombre'].' '.$p['apellido']) ?></strong><small><?= AdminForm::escape($p['email']) ?></small><small><?= AdminForm::escape($p['titulo']) ?></small></td><td data-label="Correo"><?= $p['tipo']==='certificado'?'Certificado':($p['clase_id']?'Recordatorio':'Confirmación') ?><small><?= AdminForm::escape(date('d/m/Y H:i',strtotime($p['fecha']))) ?></small></td><td data-label="Situación"><span class="admin-status <?= $p['estado']==='error'?'correo-status--error':'' ?>"><?= $reciente?'En proceso':($incierto?'Resultado incierto':($p['estado']==='error'?'Falló el envío':'Sin envío registrado')) ?></span><small><?= $p['ultimo_intento_en']?'Último intento: '.AdminForm::escape(date('d/m H:i',strtotime($p['ultimo_intento_en']))):'No se registró un intento.' ?></small></td><td data-label="Acción"><?php if($p['tipo']==='certificado'): ?><a class="activity-action-secondary" href="/admin/actividades/ediciones/certificados.php?id=<?= (int)$p['edicion_id'] ?>">Revisar certificado</a><?php elseif(!$incierto): ?><form method="post"><?= Csrf::field() ?><input type="hidden" name="inscripcion" value="<?= (int)$p['inscripcion_id'] ?>"><input type="hidden" name="clase" value="<?= (int)$p['clase_id'] ?>"><button class="activity-action-secondary" type="submit">Reintentar</button></form><?php else: ?><span class="admin-text-muted"><?= $reciente?'Actualizá en unos minutos':'Revisar servidor' ?></span><?php endif; ?></td></tr>
 <?php endforeach; ?></tbody></table></div>
 <?php endif; ?>
 <details class="admin-card correo-cron" <?= $cron['alerta']?'open':'' ?>><summary>Recordatorios automáticos · <?= $cron['alerta']?'Requieren revisión':($cron['ultima']?'Ver última ejecución':'Esperando primera ejecución') ?></summary>
