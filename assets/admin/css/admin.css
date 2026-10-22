@@ -3659,9 +3659,11 @@ a {
 .alumno-form input{width:100%;box-sizing:border-box;}
 .alumno-page td small{display:block;color:#697586;margin-top:5px;}
 .alumno-page td{overflow-wrap:anywhere;}
+.alumno-page td:last-child{width:1%;white-space:nowrap;}
+.alumno-page td .activity-action-secondary{white-space:nowrap;overflow-wrap:normal;flex-shrink:0;}
 .alumno-actions{margin-top:24px;}
 .alumno-history{border-top:1px solid #dfe3e8;margin-top:18px;padding-top:18px;overflow-wrap:anywhere;}
 .alumno-history p{margin:6px 0;}
 .alumno-page summary{cursor:pointer;}
-@media(max-width:640px){.alumno-form{grid-template-columns:1fr;}.alumno-search>div{align-items:stretch;flex-direction:column;}.alumno-search input{min-width:0;}.alumno-page .admin-table{min-width:0;display:block;}.alumno-page .admin-table thead{display:none;}.alumno-page .admin-table tbody{display:grid;gap:12px;}.alumno-page .admin-table tr{display:block;padding:16px;border-bottom:1px solid #dfe3e8;}.alumno-page .admin-table td{display:block;border:0;padding:8px 0;white-space:normal;}.alumno-page td[data-label]::before{content:attr(data-label);display:block;font-size:12px;color:#697586;margin-bottom:4px;}.alumno-page .activity-action-secondary{display:inline-flex;min-height:44px;align-items:center;}.alumno-page .admin-card{padding:20px;}}
+@media(max-width:640px){.alumno-form{grid-template-columns:1fr;}.alumno-search>div{align-items:stretch;flex-direction:column;}.alumno-search input{min-width:0;}.alumno-page .admin-table{min-width:0;display:block;}.alumno-page .admin-table thead{display:none;}.alumno-page .admin-table tbody{display:grid;gap:12px;}.alumno-page .admin-table tr{display:block;padding:16px;border-bottom:1px solid #dfe3e8;}.alumno-page .admin-table td{display:block;width:auto;border:0;padding:8px 0;white-space:normal;}.alumno-page td[data-label]::before{content:attr(data-label);display:block;font-size:12px;color:#697586;margin-bottom:4px;}.alumno-page .activity-action-secondary{display:inline-flex;min-height:44px;align-items:center;}.alumno-page .admin-card{padding:20px;}}
 @media(max-width:480px){body:has(.alumno-page) .admin-topbar__identity{display:none;}}
