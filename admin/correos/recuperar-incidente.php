@@ -42,6 +42,14 @@ try{
    if(count($ids)!==94)throw new DomainException('Cambió la cantidad de inscriptos. Revisar antes de enviar.');
    $log=['inicio'=>date(DATE_ATOM),'admin'=>Auth::id(),'clase'=>(int)$clase['id'],'ids'=>array_map('intval',$ids),'resultados'=>[]];$save();
   }
+  if(AdminForm::text('accion')==='reanudar'){
+   foreach($log['resultados'] as $id=>$r){
+    if($r['estado']!=='revisar')continue;
+    $ultimo=end($r['smtp']);
+    if(!$ultimo || $ultimo['paso']!=='DATA END' || $ultimo['ok'] || !preg_match('/^451\b/',$ultimo['respuesta']))throw new DomainException('El intento no tiene un rechazo temporal confirmado. Requiere revisión.');
+    $log['rechazos'][$id][]=$r;unset($log['resultados'][$id]);$save();
+   }
+  }
   foreach($log['resultados'] as $r)if(!in_array($r['estado'],['aceptado','ya_aceptado'],true))throw new DomainException('Lote detenido para revisar un resultado. No se reenvía automáticamente.');
   $pendientes=array_values(array_diff($log['ids'],array_map('intval',array_keys($log['resultados']))));
   if($pendientes){
@@ -67,7 +75,11 @@ $pageTitle='Recuperación de recordatorios';$pageSection='correos';require __DIR
 <?php if($log): foreach($log['resultados'] as $id=>$r): if(!in_array($r['estado'],['aceptado','ya_aceptado'],true)): ?>
 <h3>Revisar inscripción #<?= (int)$id ?></h3><?php foreach($r['smtp'] as $evento): ?><p><?= AdminForm::escape($evento['paso'].': '.$evento['respuesta']) ?></p><?php endforeach; ?><p><?= AdminForm::escape($r['error']??'No hay un resultado final. No se repetirá el intento automáticamente.') ?></p>
 <?php endif; endforeach; endif; ?>
-<?php if(!$error && $aceptados<94): ?><form id="continuar" method="post"><?= Csrf::field() ?><button class="admin-button" type="submit"><?= $log?'Continuar recuperación':'Iniciar envío a los 94' ?></button></form><?php endif; ?>
+<?php
+$temporal=false;
+foreach($log['resultados']??[] as $r){$ultimo=$r['smtp']?end($r['smtp']):null;if($r['estado']==='revisar' && $ultimo && $ultimo['paso']==='DATA END' && !$ultimo['ok'] && preg_match('/^451\b/',$ultimo['respuesta']))$temporal=true;}
+if($temporal): ?><p>El proveedor rechazó temporalmente el envío. Reanudar únicamente después de resolver el límite. Los envíos ya aceptados no se repetirán.</p><form method="post"><?= Csrf::field() ?><input type="hidden" name="accion" value="reanudar"><button class="admin-button" type="submit">Reanudar pendientes tras resolver el límite</button></form><?php endif; ?>
+<?php if(!$error && !$temporal && $aceptados<94): ?><form id="continuar" method="post"><?= Csrf::field() ?><button class="admin-button" type="submit"><?= $log?'Continuar recuperación':'Iniciar envío a los 94' ?></button></form><?php endif; ?>
 <?php if($aceptados===94): ?><p>Recuperación completada. Los resultados individuales quedaron registrados.</p><?php endif; ?>
 </div></section>
 <?php if($continuar): ?><script>setTimeout(function(){document.getElementById('continuar').requestSubmit();},1200);</script><?php endif; ?>
