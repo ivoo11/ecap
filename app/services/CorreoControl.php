@@ -6,7 +6,7 @@ final class CorreoControl
 {
     public function __construct(private PDO $pdo, private ?MailService $mailer = null) {}
 
-    public function enviar(int $inscripcion, ?int $clase = null, string $origen = 'automatico', ?int $admin = null, int $limite = 0): bool
+    public function enviar(int $inscripcion, ?int $clase = null, string $origen = 'automatico', ?int $admin = null, int $limite = 0, bool $recuperarIncierto = false): bool
     {
         // El mismo lock del cron impide reintentos simultáneos desde el administrador.
         $lock = $clase ? 'ecap_recordatorios_clase' : 'ecap_confirmacion_'.$inscripcion;
@@ -27,7 +27,7 @@ final class CorreoControl
             if ($ct && $ct['estado']==='enviado') return false;
             if ($ct) {
                 $q=$this->pdo->prepare("SELECT COUNT(*) FROM correo_intentos WHERE comunicacion_id=? AND resultado='incierto'");$q->execute([$ct['id']]);
-                if ($q->fetchColumn()) throw new DomainException('El resultado del intento anterior es incierto. Revisá el servidor de correo antes de reenviar para evitar duplicados.');
+                if ($q->fetchColumn() && !($recuperarIncierto && $origen==='recuperacion' && $admin!==null)) throw new DomainException('El resultado del intento anterior es incierto. Revisá el servidor de correo antes de reenviar para evitar duplicados.');
                 if ($limite && (int)$ct['intentos'] >= $limite) return false;
                 if ($origen==='manual' && $ct['ultimo_intento_en'] && strtotime($ct['ultimo_intento_en'])>time()-60) throw new DomainException('Esperá un minuto antes de volver a intentar.');
             } else {
