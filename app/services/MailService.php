@@ -9,7 +9,7 @@ require_once __DIR__ . '/MailTransport.php';
 
 class MailService
 {
-    protected function crearMailer(): PHPMailer
+    private function crearMailer(): PHPMailer
     {
         return MailTransport::create();
     }
