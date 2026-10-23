@@ -60,7 +60,7 @@ final class CorreoControl
         $this->pdo->beginTransaction();
         try {
             $this->pdo->prepare('UPDATE correo_intentos SET resultado=?,finalizado_en=NOW() WHERE id=?')->execute([$estado,$intento]);
-            $this->pdo->prepare("UPDATE comunicaciones_transaccionales SET estado=?,enviado_en=IF(?='enviado',NOW(),enviado_en),error_detalle=? WHERE id=?")->execute([$estado,$estado,$estado==='error'?'El servidor no confirmó el envío.':null,$id]);
+            $this->pdo->prepare("UPDATE comunicaciones_transaccionales SET estado=?,enviado_en=IF(?=1,NOW(),enviado_en),error_detalle=? WHERE id=?")->execute([$estado,(int)($estado==='enviado'),$estado==='error'?'El servidor no confirmó el envío.':null,$id]);
             $this->pdo->commit();
         } catch(Throwable $e) {if($this->pdo->inTransaction())$this->pdo->rollBack();throw $e;}
     }
