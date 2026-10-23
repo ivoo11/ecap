@@ -93,7 +93,7 @@ final class CorreoControl
         EXISTS(SELECT 1 FROM correo_intentos ci WHERE ci.comunicacion_id=ct.id AND ci.resultado='incierto') AS incierto
         FROM inscripciones i JOIN personas p ON p.id=i.persona_id JOIN ediciones e ON e.id=i.edicion_id JOIN actividades a ON a.id=e.actividad_id CROSS JOIN correo_control cc
         LEFT JOIN comunicaciones_transaccionales ct ON ct.id=(SELECT MAX(x.id) FROM comunicaciones_transaccionales x WHERE x.inscripcion_id=i.id AND x.tipo='confirmacion_inscripcion' AND x.clase_id IS NULL)
-        WHERE cc.id=1 AND i.estado='confirmada' AND e.estado NOT IN ('borrador','cancelada','finalizada') AND e.fecha_inicio>NOW()
+        WHERE cc.id=1 AND i.estado='confirmada' AND e.estado NOT IN ('borrador','cancelada')
         AND (ct.estado='error' OR (ct.estado='pendiente' AND COALESCE(ct.ultimo_intento_en,ct.creado_en)<=DATE_SUB(NOW(),INTERVAL 5 MINUTE)) OR (ct.id IS NULL AND i.id>=cc.inscripcion_desde AND i.inscripto_en<=DATE_SUB(NOW(),INTERVAL 5 MINUTE)))
         AND (? IS NULL OR i.edicion_id=?)
         UNION ALL
@@ -101,7 +101,7 @@ final class CorreoControl
         EXISTS(SELECT 1 FROM correo_intentos ci WHERE ci.comunicacion_id=ct.id AND ci.resultado='incierto')
         FROM inscripciones i JOIN personas p ON p.id=i.persona_id JOIN ediciones e ON e.id=i.edicion_id JOIN actividades a ON a.id=e.actividad_id JOIN clases c ON c.edicion_id=e.id CROSS JOIN correo_control cc
         LEFT JOIN comunicaciones_transaccionales ct ON ct.inscripcion_id=i.id AND ct.clase_id=c.id AND ct.tipo='recordatorio_clase'
-        WHERE cc.id=1 AND i.estado='confirmada' AND e.estado NOT IN ('borrador','cancelada','finalizada') AND DATE(c.fecha_inicio)=CURDATE() AND c.fecha_inicio>NOW()
+        WHERE cc.id=1 AND i.estado='confirmada' AND e.estado NOT IN ('borrador','cancelada') AND DATE(c.fecha_inicio)=CURDATE()
         AND (ct.estado='error' OR (ct.estado='pendiente' AND COALESCE(ct.ultimo_intento_en,ct.creado_en)<=DATE_SUB(NOW(),INTERVAL 5 MINUTE)) OR (ct.id IS NULL AND TIME(NOW())>='07:40:00' AND cc.desde<=TIMESTAMP(CURDATE(),'07:00:00') AND i.inscripto_en<=TIMESTAMP(CURDATE(),'07:30:00')))
         AND (? IS NULL OR i.edicion_id=?)
         UNION ALL
