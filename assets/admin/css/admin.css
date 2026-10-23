@@ -3667,3 +3667,16 @@ a {
 .alumno-page summary{cursor:pointer;}
 @media(max-width:640px){.alumno-form{grid-template-columns:1fr;}.alumno-search>div{align-items:stretch;flex-direction:column;}.alumno-search input{min-width:0;}.alumno-page .admin-table{min-width:0;display:block;}.alumno-page .admin-table thead{display:none;}.alumno-page .admin-table tbody{display:grid;gap:12px;}.alumno-page .admin-table tr{display:block;padding:16px;border-bottom:1px solid #dfe3e8;}.alumno-page .admin-table td{display:block;width:auto;border:0;padding:8px 0;white-space:normal;}.alumno-page td[data-label]::before{content:attr(data-label);display:block;font-size:12px;color:#697586;margin-bottom:4px;}.alumno-page .activity-action-secondary{display:inline-flex;min-height:44px;align-items:center;}.alumno-page .admin-card{padding:20px;}}
 @media(max-width:480px){body:has(.alumno-page) .admin-topbar__identity{display:none;}}
+
+
+/* Trazabilidad: filtros y detalle sobre componentes existentes. */
+.correo-filtros{display:flex;gap:16px;align-items:end;flex-wrap:wrap;margin-bottom:20px;}
+.correo-filtros label{display:grid;gap:8px;flex:1;min-width:180px;}
+.correo-intento{border-top:1px solid var(--admin-border);padding-top:12px;margin-top:12px;overflow-wrap:anywhere;}
+.correo-intento ol{padding-left:20px;line-height:1.6;}
+.correo-pagination{display:flex;align-items:center;gap:16px;margin-top:20px;flex-wrap:wrap;}
+.correo-page summary{cursor:pointer;}
+@media(max-width:640px){.correo-filtros{align-items:stretch;}.correo-filtros label{min-width:100%;}}
+
+.correo-resumen { margin-bottom:24px; }
+.correo-resumen__actividad + .correo-resumen__actividad { border-top:1px solid var(--admin-border, #e5e7eb); margin-top:24px; padding-top:24px; }

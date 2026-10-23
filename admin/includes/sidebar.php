@@ -150,9 +150,9 @@ declare(strict_types=1);
                 Recordatorios
             </span>
 
-            <span class="admin-nav__item is-disabled">
+            <a class="admin-nav__item" href="/admin/correos/historial.php">
                 Historial de envíos
-            </span>
+            </a>
 
         </div>
 

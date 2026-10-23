@@ -13,7 +13,8 @@ final class InscripcionService
 
     public function inscribirPersonaDesdeAdmin(
     int $personaId,
-    int $edicionId
+    int $edicionId,
+    ?int $administradorId = null
 ): int {
 
     if ($personaId <= 0 || $edicionId <= 0) {
@@ -241,7 +242,9 @@ final class InscripcionService
 
             $this->enviarConfirmacion(
                 $personaId,
-                $edicionId
+                $edicionId,
+                'admin',
+                $administradorId
             );
 
         } catch (Throwable $e) {
@@ -258,7 +261,9 @@ final class InscripcionService
 
     public function enviarConfirmacion(
         int $personaId,
-        int $edicionId
+        int $edicionId,
+        string $origen = 'automatico',
+        ?int $administradorId = null
     ): void {
 
         require_once __DIR__.'/CorreoControl.php';
@@ -266,6 +271,6 @@ final class InscripcionService
         $q->execute([$personaId,$edicionId]);
         $id=$q->fetchColumn();
         if(!$id)throw new DomainException('Inscripción no encontrada.');
-        (new CorreoControl($this->pdo))->enviar((int)$id);
+        (new CorreoControl($this->pdo))->enviar((int)$id,null,$origen,$administradorId);
     }
 }

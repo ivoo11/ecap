@@ -210,7 +210,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $inscripcionService->inscribirPersonaDesdeAdmin(
                     (int) $personaId,
-                    $edicionId
+                    $edicionId,
+                    (int) Auth::id()
                 );
 
                 /*

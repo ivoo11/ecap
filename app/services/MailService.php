@@ -9,9 +9,22 @@ require_once __DIR__ . '/MailTransport.php';
 
 class MailService
 {
+    private ?CorreoTraza $traza = null;
+    public function observar(CorreoTraza $traza): void { $this->traza = $traza; }
     private function crearMailer(): PHPMailer
     {
-        return MailTransport::create();
+        $mail = MailTransport::create();
+        $mail->Timeout = 15;
+        if ($this->traza) {
+            $mail->MessageID = $this->traza->messageId;
+            if (!Environment::isLocal()) {
+                $smtp = new CorreoSMTP($this->traza);
+                $smtp->Timeout = 15;
+                $smtp->Timelimit = 20;
+                $mail->setSMTPInstance($smtp);
+            }
+        }
+        return $mail;
     }
 
         public function enviarConfirmacionInscripcion(
@@ -355,7 +368,7 @@ class MailService
         $mail->AltBody = $altBody;
 
 
-        $mail->send();
+        if (!$mail->send()) throw new RuntimeException('El transporte no confirmó el envío.');
     }
 
 
@@ -776,7 +789,7 @@ class MailService
 
         $mail->AltBody = $altBody;
 
-        $mail->send();
+        if (!$mail->send()) throw new RuntimeException('El transporte no confirmó el envío.');
     }
     public function enviarCertificado(string $email,string $nombre,string $titulo,string $archivo): void
     {

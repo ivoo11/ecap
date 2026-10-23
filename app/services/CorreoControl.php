@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/MailService.php';
+require_once __DIR__.'/CorreoTraza.php';
 
 final class CorreoControl
 {
@@ -41,26 +42,46 @@ final class CorreoControl
                 $this->pdo->prepare("UPDATE comunicaciones_transaccionales SET estado='pendiente',intentos=intentos+1,ultimo_intento_en=NOW(),destinatario_email=? WHERE id=?")->execute([$d['email'],$ct['id']]);
                 $this->pdo->commit();
             } catch(Throwable $e) {if($this->pdo->inTransaction())$this->pdo->rollBack();throw $e;}
-            $mail=$this->mailer ?? new MailService();
+            $traza=null;
             try {
+                $traza=new CorreoTraza($this->pdo,$intento,'<ecap-'.$ct['id'].'-'.$intento.'-'.bin2hex(random_bytes(8)).'@ecap.com.ar>');
+                $mail=$this->mailer ?? new MailService();
+                $mail->observar($traza);
                 if ($clase) $mail->enviarRecordatorioClase($d['email'],trim($d['nombre'].' '.$d['apellido']),$d['titulo'],$c['fecha_inicio'],$d['modalidad'],$d['zoom_url']??'',$d['zoom_meeting_id']??'',$d['zoom_passcode']??'',(int)$c['numero'],$c['titulo']??'',(int)$c['total']);
                 else $mail->enviarConfirmacionInscripcion($d['email'],$d['nombre'],$d['titulo'],$d['fecha_inicio'],$d['modalidad'],$d['zoom_url']??'',$d['zoom_meeting_id']??'',$d['zoom_passcode']??'');
             } catch(Throwable $e) {
-                $this->resultado((int)$ct['id'],$intento,'error');
+                $detalle=$traza ? $traza->diagnostico() : 'No se pudo iniciar la trazabilidad. Revisar la migración correo_eventos y la conexión a la base.';
+                if ($traza && $traza->aceptado) {
+                    // La respuesta final 250 ya está persistida: un fallo posterior no cambia esa evidencia.
+                    $this->resultado((int)$ct['id'],$intento,'enviado');
+                    $traza->cerrar();
+                    return true;
+                }
+                if ($traza && $traza->ambiguo()) {
+                    $traza->evento('revision',null,$traza->aceptado?'El servidor aceptó el mensaje; el cierre del proceso requiere revisión.':$detalle);
+                    $traza->cerrar();
+                    $this->pdo->prepare('UPDATE comunicaciones_transaccionales SET error_detalle=? WHERE id=?')->execute([$detalle,$ct['id']]);
+                    throw new DomainException('El intento requiere revisión. No se reenvió para evitar duplicados.');
+                }
+                $this->resultado((int)$ct['id'],$intento,'error',$detalle);
+                if($traza){$traza->evento('fallido',null,$detalle);$traza->cerrar();}
                 error_log('ECAP correo fallido #'.$ct['id'].': '.$e->getMessage());
                 throw new DomainException('El servidor no confirmó el envío. Revisá la dirección y la configuración de correo.');
             }
+            // Los transportes de prueba también deben registrar su aceptación explícita.
+            if (!$traza->aceptado) $traza->evento(Environment::isLocal()?'capturado_local':'aceptado');
             $this->resultado((int)$ct['id'],$intento,'enviado');
+            $traza->cerrar();
             return true;
         } finally {$q=$this->pdo->prepare('SELECT RELEASE_LOCK(?)');$q->execute([$lock]);}
     }
 
-    private function resultado(int $id,int $intento,string $estado): void
+    private function resultado(int $id,int $intento,string $estado,?string $detalle=null): void
     {
         $this->pdo->beginTransaction();
         try {
             $this->pdo->prepare('UPDATE correo_intentos SET resultado=?,finalizado_en=NOW() WHERE id=?')->execute([$estado,$intento]);
-            $this->pdo->prepare("UPDATE comunicaciones_transaccionales SET estado=?,enviado_en=IF(?=1,NOW(),enviado_en),error_detalle=? WHERE id=?")->execute([$estado,(int)($estado==='enviado'),$estado==='error'?'El servidor no confirmó el envío.':null,$id]);
+            $this->pdo->prepare("UPDATE comunicaciones_transaccionales SET estado=?,enviado_en=IF(?=1,NOW(),enviado_en),error_detalle=? WHERE id=?")->execute([$estado,(int)($estado==='enviado'),$estado==='error'?($detalle??'El servidor no confirmó el envío.'):null,$id]);
             $this->pdo->commit();
         } catch(Throwable $e) {if($this->pdo->inTransaction())$this->pdo->rollBack();throw $e;}
     }
