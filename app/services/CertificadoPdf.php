@@ -4,6 +4,8 @@ require_once __DIR__.'/../config/Environment.php';
 
 final class CertificadoPdf
 {
+    public const DEFAULT_BACKGROUND = '1dff6b16cd1765f91eebee9c504436a6.png';
+
     public static function directory(): string
     {
         $path = Environment::isLocal() ? Environment::runtimePath().'/certificados' : dirname(__DIR__,3).'/ecap_certificados';
@@ -14,6 +16,7 @@ final class CertificadoPdf
     public static function file(string $name): string
     {
         if (!preg_match('/^[a-f0-9]{32}\.(pdf|png)$/D',$name)) throw new RuntimeException('Archivo de certificado inválido.');
+        if ($name === self::DEFAULT_BACKGROUND) return __DIR__.'/../resources/certificados/'.$name;
         return self::directory().'/'.$name;
     }
 
@@ -57,14 +60,14 @@ final class CertificadoPdf
     public static function render(array $config,string $nombre,bool $preview=false): string
     {
         $pdf=self::engine();$pdf->SetAutoPageBreak(false);$pdf->AddPage();
-        $path=empty($config['fondo']) ? __DIR__.'/../resources/certificados/fondo-muestra.png' : self::file($config['fondo']);
+        $path=self::file($config['fondo'] ?: self::DEFAULT_BACKGROUND);
         if(!is_file($path)) throw new DomainException('No se encuentra la plantilla. Volvé a cargarla.');
         if(str_ends_with($path,'.pdf')){
             $pdf->setSourceFile($path);$pdf->useTemplate($pdf->importPage(1),0,0,297,210);
         } else $pdf->Image($path,0,0,297,210,'png');
         // Sustituye la leyenda fija del modelo original; no altera el archivo base.
         $pdf->SetFillColor(255,255,255);$pdf->Rect(105,106.5,87,8,'F');
-        $pdf->SetTextColor(30,30,38);self::center($pdf,'POR SU PARTICIPACIÓN EN','montserratecap',12,113.1,230,12);
+        $pdf->SetFillColor(30,30,38);$pdf->SetTextColor(30,30,38);self::center($pdf,'POR SU PARTICIPACIÓN EN','montserratecap',12,113.1,230,12);
         $pdf->SetTextColor(0,18,41);
         self::center($pdf,$config['encabezado'],'cinzelecap',35,66.4,260,22);
         self::center($pdf,$nombre,'cormorantnombre',45,101.4,230,24);

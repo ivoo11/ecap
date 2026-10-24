@@ -14,7 +14,9 @@ final class CertificadoService
     public function config(int $id): array
     {
         $q=$this->pdo->prepare('SELECT * FROM certificado_configuracion WHERE edicion_id=?');$q->execute([$id]);
-        return $q->fetch() ?: ['edicion_id'=>$id,'encabezado'=>'','titulo'=>$this->edicion($id)['titulo'],'fondo'=>null,'aprobado'=>0,'revision'=>0];
+        $config = $q->fetch() ?: ['edicion_id'=>$id,'encabezado'=>'','titulo'=>$this->edicion($id)['titulo'],'fondo'=>null,'aprobado'=>0,'revision'=>0];
+        $config['fondo'] = $config['fondo'] ?: CertificadoPdf::DEFAULT_BACKGROUND;
+        return $config;
     }
     public function guardar(int $id,array $d,int $admin,int $revision): void
     {
@@ -97,7 +99,7 @@ final class CertificadoService
         $this->pdo->beginTransaction();
         try {
             $this->pdo->prepare('UPDATE correo_intentos SET resultado=?,finalizado_en=NOW() WHERE id=?')->execute([$estado,$intento]);
-            $this->pdo->prepare("UPDATE comunicaciones_transaccionales SET estado=?,enviado_en=IF(?='enviado',NOW(),enviado_en),error_detalle=? WHERE id=?")->execute([$estado,$estado,$estado==='error'?'El servidor no confirmó el envío del certificado.':null,$ct]);$this->pdo->commit();
+            $this->pdo->prepare("UPDATE comunicaciones_transaccionales SET estado=?,enviado_en=IF(?=1,NOW(),enviado_en),error_detalle=? WHERE id=?")->execute([$estado,(int)($estado==='enviado'),$estado==='error'?'El servidor no confirmó el envío del certificado.':null,$ct]);$this->pdo->commit();
         } catch(Throwable $e){if($this->pdo->inTransaction())$this->pdo->rollBack();throw $e;}
     }
 }
