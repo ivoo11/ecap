@@ -2783,19 +2783,19 @@ textarea {
     .activity-detail .activity-intro { padding-top: 36px; }
 }
 
-/* Próximas actividades: fecha en el espacio inferior derecho de la placa. */
-.activity-item:not(.activity-item-past) .activity-image {
+/* Actividades próximas y anteriores: fecha proporcional en el espacio inferior derecho. */
+.activity-item .activity-image {
     container-type: inline-size;
 }
-.activity-item:not(.activity-item-past) .activity-date-overlay {
+.activity-item .activity-date-overlay {
     left: auto;
     right: 6%;
     bottom: 10%;
 }
-.activity-item:not(.activity-item-past) .activity-date-overlay .fallback-day {
+.activity-item .activity-date-overlay .fallback-day {
     font-size: clamp(2.5rem, 18cqw, 9rem);
 }
-.activity-item:not(.activity-item-past) .activity-date-overlay .fallback-month {
+.activity-item .activity-date-overlay .fallback-month {
     font-size: clamp(0.65rem, 3cqw, 1.2rem);
     margin-left: 0.55em;
     margin-bottom: 0;
