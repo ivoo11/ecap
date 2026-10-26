@@ -534,6 +534,9 @@ require __DIR__ . '/../../includes/header.php';
                     <input
                         type="text"
                         id="dni"
+                        autocorrect="off"
+                        autocapitalize="none"
+                        spellcheck="false"
                         name="dni"
                         inputmode="numeric"
                         autocomplete="off"
