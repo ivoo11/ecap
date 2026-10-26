@@ -385,13 +385,6 @@ if (!empty($actividad['imagen_portada'])) {
 
 
 
-<section class="detail-description" aria-label="Certificación">
-<div class="container detail-content-grid">
-<?php require __DIR__ . '/../includes/condiciones-certificados.php'; ?>
-<p><a href="/condiciones-certificados/">Consultar condiciones para la emisión de certificados</a></p>
-</div>
-</section>
-
 <?php if (!empty($docentes)): ?>
 
             <div class="activity-teachers">
@@ -588,6 +581,10 @@ if (!empty($actividad['imagen_portada'])) {
 <?php endif; ?>
 
 
+
+<div class="container activity-certificate-note">
+    <a href="/condiciones-certificados/">Condiciones para la emisión de certificados</a>
+</div>
 
 </main>
 

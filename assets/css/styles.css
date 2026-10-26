@@ -2806,3 +2806,17 @@ textarea {
 .certificate-policy h1 { font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.15; max-width: 24ch; }
 .certificate-policy-note { max-width: 76ch; color: var(--muted); font-size: .875rem; line-height: 1.6; }
 .certificate-policy a { color: var(--navy, #101d30); text-decoration: underline; text-underline-offset: .2em; }
+
+.activity-detail .activity-certificate-note {
+    max-width: 1040px;
+    padding-bottom: 32px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.activity-certificate-note a {
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.activity-certificate-note a:hover,
+.activity-certificate-note a:focus-visible { color: var(--navy, #101d30); }
