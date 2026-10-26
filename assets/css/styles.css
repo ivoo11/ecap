@@ -2800,3 +2800,9 @@ textarea {
     margin-left: 0.55em;
     margin-bottom: 0;
 }
+
+/* Condiciones de certificación: lectura cómoda en todos los tamaños. */
+.certificate-policy { padding-top: 32px; }
+.certificate-policy h1 { font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.15; max-width: 24ch; }
+.certificate-policy-note { max-width: 76ch; color: var(--muted); font-size: .875rem; line-height: 1.6; }
+.certificate-policy a { color: var(--navy, #101d30); text-decoration: underline; text-underline-offset: .2em; }
