@@ -38,7 +38,7 @@ final class CertificadoService
     public function participantes(int $id): array
     {
         $q=$this->pdo->prepare("SELECT i.id,i.estado AS inscripcion_estado,p.nombre,p.apellido,p.email,c.id AS certificado_id,c.estado AS certificado_estado,c.archivo,c.emitido_en,ct.estado AS correo_estado,ct.ultimo_intento_en,
-        EXISTS(SELECT 1 FROM correo_intentos ci WHERE ci.comunicacion_id=ct.id AND ci.resultado='incierto') AS incierto
+        EXISTS(SELECT 1 FROM correo_intentos ci WHERE ci.comunicacion_id=ct.id AND ci.resultado='incierto' AND ci.id=(SELECT MAX(ultimo.id) FROM correo_intentos ultimo WHERE ultimo.comunicacion_id=ct.id)) AS incierto
         FROM inscripciones i JOIN personas p ON p.id=i.persona_id LEFT JOIN certificados c ON c.inscripcion_id=i.id
         LEFT JOIN comunicaciones_transaccionales ct ON ct.id=(SELECT MAX(x.id) FROM comunicaciones_transaccionales x WHERE x.inscripcion_id=i.id AND x.tipo='certificado' AND x.clase_id IS NULL)
         WHERE i.edicion_id=? ORDER BY p.apellido,p.nombre,i.id");$q->execute([$id]);return $q->fetchAll();
@@ -51,7 +51,7 @@ final class CertificadoService
     {
         return hash('sha256',json_encode([$p['id'],$p['nombre'],$p['apellido'],$p['email']],JSON_UNESCAPED_UNICODE));
     }
-    public function enviar(int $edicion,int $inscripcion,int $admin,string $huella,int $revision): bool
+    public function enviar(int $edicion,int $inscripcion,int $admin,string $huella,int $revision,bool $confirmarReenvio=false): bool
     {
         $lock='ecap_certificado_'.$inscripcion;$q=$this->pdo->prepare('SELECT GET_LOCK(?,0)');$q->execute([$lock]);
         if((int)$q->fetchColumn()!==1)throw new DomainException('Este certificado tiene un envío en proceso.');
@@ -62,7 +62,7 @@ final class CertificadoService
             $p=null;foreach($this->participantes($edicion) as $row)if((int)$row['id']===$inscripcion)$p=$row;
             if(!$p || !hash_equals(self::huella($p),$huella))throw new DomainException('Los datos de la persona cambiaron. Revisalos antes de enviar.');
             if($p['correo_estado']==='enviado')return false;
-            if(!self::elegible($p))throw new DomainException('Esta inscripción no admite la emisión o requiere revisar un envío incierto.');
+            if(!self::elegible($p) && !($confirmarReenvio && $admin>0 && $p['inscripcion_estado']==='confirmada' && $p['certificado_estado']==='emitido'))throw new DomainException('Esta inscripción no admite la emisión o requiere revisar un envío incierto.');
             if($p['ultimo_intento_en'] && strtotime($p['ultimo_intento_en'])>time()-60)throw new DomainException('Esperá un minuto antes de reintentar.');
             if(!filter_var($p['email'],FILTER_VALIDATE_EMAIL))throw new DomainException('La dirección de correo no es válida.');
             if($p['certificado_estado']!=='emitido'){
