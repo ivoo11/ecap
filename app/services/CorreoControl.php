@@ -120,7 +120,23 @@ final class CorreoControl
         JOIN comunicaciones_transaccionales ct ON ct.certificado_docente_id=cd.id
         WHERE (ct.estado='error' OR (ct.estado='pendiente' AND COALESCE(ct.ultimo_intento_en,ct.creado_en)<=DATE_SUB(NOW(),INTERVAL 5 MINUTE)))
         AND (? IS NULL OR cd.edicion_id=?) ORDER BY fecha,apellido,nombre";
-        $q=$this->pdo->prepare($sql);$q->execute([$edicion,$edicion,$edicion,$edicion,$edicion,$edicion,$edicion,$edicion]);return $q->fetchAll();
+        $q=$this->pdo->prepare($sql);$q->execute([$edicion,$edicion,$edicion,$edicion,$edicion,$edicion,$edicion,$edicion]);$rows=$q->fetchAll();
+        $descartes=$this->pdo->query('SELECT comunicacion_id,version FROM correo_descartes')->fetchAll(PDO::FETCH_KEY_PAIR);
+        return array_values(array_filter($rows,fn($row)=>!isset($descartes[$row['comunicacion_id']??0]) || !hash_equals($descartes[$row['comunicacion_id']],self::versionAviso($row))));
+    }
+
+    public static function versionAviso(array $row): string
+    {
+        return hash('sha256',json_encode([(int)($row['comunicacion_id']??0),(int)($row['intentos']??0),$row['ultimo_intento_en']??null,$row['estado']??null,$row['error_detalle']??null]));
+    }
+
+    public function descartar(int $comunicacion,string $version,int $admin): void
+    {
+        $actual=null;
+        foreach($this->pendientes() as $row)if((int)$row['comunicacion_id']===$comunicacion)$actual=$row;
+        if(!$actual || $comunicacion<1 || !hash_equals(self::versionAviso($actual),$version))throw new DomainException('El aviso cambió. Actualizá la página antes de descartarlo.');
+        if($actual['ultimo_intento_en'] && strtotime($actual['ultimo_intento_en'])>time()-300)throw new DomainException('Hay un intento reciente. Esperá a que finalice.');
+        $this->pdo->prepare('INSERT INTO correo_descartes(comunicacion_id,version,administrador_id) VALUES(?,?,?) ON DUPLICATE KEY UPDATE version=VALUES(version),administrador_id=VALUES(administrador_id),descartado_en=CURRENT_TIMESTAMP')->execute([$comunicacion,$version,$admin]);
     }
 
     public function cron(): array
