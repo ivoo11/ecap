@@ -111,8 +111,16 @@ final class CorreoControl
         FROM comunicaciones_transaccionales ct JOIN inscripciones i ON i.id=ct.inscripcion_id JOIN personas p ON p.id=i.persona_id JOIN ediciones e ON e.id=i.edicion_id JOIN actividades a ON a.id=e.actividad_id JOIN certificados cert ON cert.inscripcion_id=i.id
         WHERE ct.tipo='certificado' AND cert.estado='emitido'
         AND (ct.estado='error' OR (ct.estado='pendiente' AND COALESCE(ct.ultimo_intento_en,ct.creado_en)<=DATE_SUB(NOW(),INTERVAL 5 MINUTE)))
-        AND (? IS NULL OR i.edicion_id=?) ORDER BY fecha,apellido,nombre";
-        $q=$this->pdo->prepare($sql);$q->execute([$edicion,$edicion,$edicion,$edicion,$edicion,$edicion]);return $q->fetchAll();
+        AND (? IS NULL OR i.edicion_id=?)
+        UNION ALL
+        SELECT d.id,NULL,'certificado_docente',p.nombre,p.apellido,p.email,a.titulo,cd.edicion_id,e.fecha_inicio,ct.id,ct.estado,ct.intentos,ct.ultimo_intento_en,ct.error_detalle,
+        EXISTS(SELECT 1 FROM correo_intentos ci WHERE ci.comunicacion_id=ct.id AND ci.resultado='incierto' AND ci.id=(SELECT MAX(ultimo.id) FROM correo_intentos ultimo WHERE ultimo.comunicacion_id=ct.id))
+        FROM certificados_docentes cd JOIN docentes d ON d.id=cd.docente_id JOIN personas p ON p.id=d.persona_id
+        JOIN ediciones e ON e.id=cd.edicion_id JOIN actividades a ON a.id=e.actividad_id
+        JOIN comunicaciones_transaccionales ct ON ct.certificado_docente_id=cd.id
+        WHERE (ct.estado='error' OR (ct.estado='pendiente' AND COALESCE(ct.ultimo_intento_en,ct.creado_en)<=DATE_SUB(NOW(),INTERVAL 5 MINUTE)))
+        AND (? IS NULL OR cd.edicion_id=?) ORDER BY fecha,apellido,nombre";
+        $q=$this->pdo->prepare($sql);$q->execute([$edicion,$edicion,$edicion,$edicion,$edicion,$edicion,$edicion,$edicion]);return $q->fetchAll();
     }
 
     public function cron(): array

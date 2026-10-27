@@ -3680,3 +3680,20 @@ a {
 
 .correo-resumen { margin-bottom:24px; }
 .correo-resumen__actividad + .correo-resumen__actividad { border-top:1px solid var(--admin-border, #e5e7eb); margin-top:24px; padding-top:24px; }
+
+/* Destinatarios del certificado: misma navegación y controles en ambos circuitos. */
+.certificado-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #dfe3e8;margin-bottom:28px;}
+.certificado-tabs a{padding:12px 18px;min-height:44px;box-sizing:border-box;color:#697586;text-decoration:none;border-bottom:3px solid transparent;font-weight:600;}
+.certificado-tabs a[aria-current=page]{color:#101d30;border-bottom-color:#101d30;}
+.certificado-tabs a:focus-visible{outline:2px solid #101d30;outline-offset:2px;}
+.certificado-page .certificado-rol{min-width:130px;max-width:100%;}
+
+@media(max-width:1100px){
+.certificado-page--docentes .admin-table{min-width:0;display:block;}
+.certificado-page--docentes .admin-table thead{display:none;}
+.certificado-page--docentes .admin-table tbody{display:grid;gap:16px;}
+.certificado-page--docentes .admin-table tr{display:grid;border:1px solid #dfe3e8;border-radius:12px;padding:14px;}
+.certificado-page--docentes .admin-table td{display:block;border:0;padding:6px 0;}
+.certificado-page--docentes .admin-table td[data-label]::before{content:attr(data-label);display:block;font-size:12px;color:#697586;margin-bottom:4px;}
+.certificado-page--docentes td small{overflow-wrap:anywhere;}
+}

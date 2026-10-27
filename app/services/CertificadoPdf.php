@@ -67,7 +67,7 @@ final class CertificadoPdf
         } else $pdf->Image($path,0,0,297,210,'png');
         // Sustituye la leyenda fija del modelo original; no altera el archivo base.
         $pdf->SetFillColor(255,255,255);$pdf->Rect(105,106.5,87,8,'F');
-        $pdf->SetFillColor(30,30,38);$pdf->SetTextColor(30,30,38);self::center($pdf,'POR SU PARTICIPACIÓN EN','montserratecap',12,113.1,230,12);
+        $pdf->SetFillColor(30,30,38);$pdf->SetTextColor(30,30,38);self::center($pdf,$config['leyenda']??'POR SU PARTICIPACIÓN EN','montserratecap',12,113.1,230,10);
         $pdf->SetTextColor(0,18,41);
         self::center($pdf,$config['encabezado'],'cinzelecap',35,66.4,260,22);
         self::center($pdf,$nombre,'cormorantnombre',45,101.4,230,24);

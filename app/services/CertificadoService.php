@@ -3,9 +3,11 @@ declare(strict_types=1);
 require_once __DIR__.'/CertificadoPdf.php';
 require_once __DIR__.'/MailService.php';
 
-final class CertificadoService
+class CertificadoService
 {
-    public function __construct(private PDO $pdo,private ?MailService $mail=null) {}
+    protected const CONFIG_TABLE = 'certificado_configuracion';
+    protected const DEFAULT_HEADER = '';
+    public function __construct(protected PDO $pdo,protected ?MailService $mail=null) {}
     public function edicion(int $id): array
     {
         $q=$this->pdo->prepare('SELECT e.*,a.titulo FROM ediciones e JOIN actividades a ON a.id=e.actividad_id WHERE e.id=?');$q->execute([$id]);
@@ -13,8 +15,8 @@ final class CertificadoService
     }
     public function config(int $id): array
     {
-        $q=$this->pdo->prepare('SELECT * FROM certificado_configuracion WHERE edicion_id=?');$q->execute([$id]);
-        $config = $q->fetch() ?: ['edicion_id'=>$id,'encabezado'=>'','titulo'=>$this->edicion($id)['titulo'],'fondo'=>null,'aprobado'=>0,'revision'=>0];
+        $q=$this->pdo->prepare('SELECT * FROM '.static::CONFIG_TABLE.' WHERE edicion_id=?');$q->execute([$id]);
+        $config = $q->fetch() ?: ['edicion_id'=>$id,'encabezado'=>static::DEFAULT_HEADER,'titulo'=>$this->edicion($id)['titulo'],'fondo'=>null,'aprobado'=>0,'revision'=>0];
         $config['fondo'] = $config['fondo'] ?: CertificadoPdf::DEFAULT_BACKGROUND;
         return $config;
     }
@@ -27,10 +29,10 @@ final class CertificadoService
         if($d['aprobado'] && empty($d['fondo']))throw new DomainException('Cargá la plantilla definitiva con las firmas antes de habilitar la emisión.');
         CertificadoPdf::render($d,'Usuario de Prueba',true);
         if($revision===0){
-            try{$this->pdo->prepare('INSERT INTO certificado_configuracion(edicion_id,encabezado,titulo,fondo,aprobado,actualizado_por) VALUES(?,?,?,?,?,?)')->execute([$id,$d['encabezado'],$d['titulo'],$d['fondo'],$d['aprobado'],$admin]);}
+            try{$this->pdo->prepare('INSERT INTO '.static::CONFIG_TABLE.'(edicion_id,encabezado,titulo,fondo,aprobado,actualizado_por) VALUES(?,?,?,?,?,?)')->execute([$id,$d['encabezado'],$d['titulo'],$d['fondo'],$d['aprobado'],$admin]);}
             catch(PDOException $e){if($e->getCode()==='23000')throw new DomainException('La configuración cambió. Recargá la página.');throw $e;}
         } else {
-            $q=$this->pdo->prepare('UPDATE certificado_configuracion SET encabezado=?,titulo=?,fondo=?,aprobado=?,revision=revision+1,actualizado_por=? WHERE edicion_id=? AND revision=?');
+            $q=$this->pdo->prepare('UPDATE '.static::CONFIG_TABLE.' SET encabezado=?,titulo=?,fondo=?,aprobado=?,revision=revision+1,actualizado_por=? WHERE edicion_id=? AND revision=?');
             $q->execute([$d['encabezado'],$d['titulo'],$d['fondo'],$d['aprobado'],$admin,$id,$revision]);
             if(!$q->rowCount())throw new DomainException('La configuración cambió. Recargá la página antes de guardar.');
         }
