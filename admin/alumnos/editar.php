@@ -5,6 +5,11 @@ require_once __DIR__.'/../../app/services/AdminForm.php';
 require_once __DIR__.'/../../app/services/AlumnoService.php';
 $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT)?:0;$service=new AlumnoService($pdo);
 try{$p=$service->obtener($id);}catch(DomainException $e){http_response_code(404);exit('Persona no encontrada.');}
+$docenteOrigen=filter_input(INPUT_GET,'docente',FILTER_VALIDATE_INT)?:null;
+if($docenteOrigen){
+    $stmt=$pdo->prepare('SELECT id FROM docentes WHERE id=? AND persona_id=?');$stmt->execute([$docenteOrigen,$id]);
+    if(!$stmt->fetchColumn())$docenteOrigen=null;
+}
 $values=$p;$version=AlumnoService::version($p);$error=null;$canEdit=!$service->protegida($id) || Auth::hasRole('superadmin');
 if($_SERVER['REQUEST_METHOD']==='POST'){
     AdminForm::csrf();$version=AdminForm::text('version');
@@ -12,14 +17,14 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     try{
         $changed=$service->guardar($id,array_intersect_key($values,array_flip(['nombre','apellido','dni','email','telefono'])),$version,(int)Auth::id());
         if($id===(int)$usuario['persona_id'])foreach(['nombre','apellido','dni','email'] as $key)$_SESSION['auth'][$key]=$values[$key];
-        header('Location: editar.php?id='.$id.'&guardado='.($changed?'1':'0'));exit;
+        header('Location: editar.php?id='.$id.'&guardado='.($changed?'1':'0').($docenteOrigen?'&docente='.$docenteOrigen:''));exit;
     }catch(Throwable $e){$error=$e instanceof DomainException?$e->getMessage():'No se pudieron guardar los cambios. Ningún dato fue modificado.';error_log('ECAP alumnos: '.$e->getMessage());}
 }
 $stmt=$pdo->prepare("SELECT i.estado,i.inscripto_en,e.id AS edicion_id,e.fecha_inicio,a.titulo,c.estado AS certificado_estado, ct.id AS correo_id, ct.estado AS correo_estado, ct.enviado_en, ct.destinatario_email, ct.intentos, ct.ultimo_intento_en, EXISTS(SELECT 1 FROM correo_intentos ci WHERE ci.comunicacion_id=ct.id AND ci.resultado='incierto') AS correo_incierto FROM inscripciones i JOIN ediciones e ON e.id=i.edicion_id JOIN actividades a ON a.id=e.actividad_id LEFT JOIN certificados c ON c.inscripcion_id=i.id LEFT JOIN comunicaciones_transaccionales ct ON ct.id=(SELECT MAX(x.id) FROM comunicaciones_transaccionales x WHERE x.inscripcion_id=i.id AND x.tipo='confirmacion_inscripcion' AND x.clase_id IS NULL) WHERE i.persona_id=? ORDER BY e.fecha_inicio DESC");$stmt->execute([$id]);$inscripciones=$stmt->fetchAll();
 $stmt=$pdo->prepare("SELECT au.creado_en,au.detalle,p.nombre,p.apellido FROM auditoria au LEFT JOIN usuarios u ON u.id=au.usuario_id LEFT JOIN personas p ON p.id=u.persona_id WHERE au.entidad='personas' AND au.entidad_id=? AND au.accion='actualizar_datos' ORDER BY au.id DESC LIMIT 10");$stmt->execute([$id]);$history=$stmt->fetchAll();
-$pageTitle='Ficha de alumno';$pageSection='alumnos';require __DIR__.'/../includes/header.php';
+$pageTitle=$docenteOrigen?'Datos personales del docente':'Ficha de alumno';$pageSection=$docenteOrigen?'docentes':'alumnos';require __DIR__.'/../includes/header.php';
 ?>
-<section class="admin-page alumno-page"><header class="admin-page__header"><div><h1><?= AdminForm::escape($p['nombre'].' '.$p['apellido']) ?></h1><p>DNI <?= AdminForm::escape($p['dni']) ?> · <?= count($inscripciones) ?> inscripciones</p></div><a class="activity-action-secondary" href="/admin/alumnos/">Volver a alumnos</a></header>
+<section class="admin-page alumno-page"><header class="admin-page__header"><div><h1><?= AdminForm::escape($p['nombre'].' '.$p['apellido']) ?></h1><p>DNI <?= AdminForm::escape($p['dni']) ?> · <?= count($inscripciones) ?> inscripciones</p></div><a class="activity-action-secondary" href="<?= $docenteOrigen?'/admin/docentes/editar.php?id='.$docenteOrigen:'/admin/alumnos/' ?>"><?= $docenteOrigen?'Volver al docente':'Volver a alumnos' ?></a></header>
 <?php if($error):?><div class="admin-alert admin-alert--error" role="alert"><?= AdminForm::escape($error) ?></div><?php endif;?>
 <?php if(isset($_GET['guardado'])):?><div class="edition-message edition-message--success" role="status"><?= $_GET['guardado']==='1'?'Datos actualizados. No se envió ningún correo.':'No había cambios para guardar.' ?></div><?php endif;?>
 <section class="admin-card"><h2>Datos personales</h2><?php if(!$canEdit):?><p>Este perfil tiene acceso administrativo. Solo un superadministrador puede modificarlo.</p><?php endif;?>
