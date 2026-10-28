@@ -18,11 +18,12 @@ class CertificadoService
         $q=$this->pdo->prepare('SELECT * FROM '.static::CONFIG_TABLE.' WHERE edicion_id=?');$q->execute([$id]);
         $config = $q->fetch() ?: ['edicion_id'=>$id,'encabezado'=>static::DEFAULT_HEADER,'titulo'=>$this->edicion($id)['titulo'],'fondo'=>null,'aprobado'=>0,'revision'=>0];
         $config['fondo'] = $config['fondo'] ?: CertificadoPdf::DEFAULT_BACKGROUND;
+        $config['fecha_edicion'] = CertificadoPdf::fechaEdicion($this->edicion($id));
         return $config;
     }
     public function guardar(int $id,array $d,int $admin,int $revision): void
     {
-        $this->edicion($id);
+        $d['fecha_edicion'] = CertificadoPdf::fechaEdicion($this->edicion($id));
         foreach(['encabezado'=>120,'titulo'=>500] as $field=>$max){
             if(!is_string($d[$field]??null) || trim($d[$field])==='' || mb_strlen($d[$field])>$max || preg_match('/[\x00-\x1f]/u',$d[$field])) throw new DomainException('Completá el encabezado y el título con una longitud válida.');
         }

@@ -57,6 +57,16 @@ final class CertificadoPdf
         chmod($path,0600);return $name;
     }
 
+    public static function fechaEdicion(array $edicion): string
+    {
+        $fecha = ($edicion['fecha_fin'] ?? null) ?: ($edicion['fecha_inicio'] ?? null);
+        if (!$fecha) throw new DomainException('La edición no tiene fecha para el certificado.');
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', substr($fecha, 0, 10));
+        if (!$date || $date->format('Y-m-d') !== substr($fecha, 0, 10)) throw new DomainException('Revisá la fecha de la edición.');
+        $meses = [1=>'Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        return $meses[(int)$date->format('n')].' de '.$date->format('Y');
+    }
+
     public static function render(array $config,string $nombre,bool $preview=false): string
     {
         $pdf=self::engine();$pdf->SetAutoPageBreak(false);$pdf->AddPage();
@@ -72,7 +82,7 @@ final class CertificadoPdf
         self::center($pdf,$config['encabezado'],'cinzelecap',35,66.4,260,22);
         self::center($pdf,$nombre,'cormorantnombre',45,101.4,230,24);
         $title=preg_replace('/\s+/u',' ',trim($config['titulo']));
-        for($size=30;$size>=20;$size-=.5){
+        for($size=26;$size>=20;$size-=.5){
             $pdf->SetFont('cormorantecap','',$size);$lines=[];$line='';
             foreach(explode(' ',$title) as $word){
                 if($pdf->GetStringWidth($word)>230) continue 2;
@@ -82,7 +92,8 @@ final class CertificadoPdf
             $lines[]=$line;if(count($lines)<=3)break;
         }
         if($size<20)throw new DomainException('El título es demasiado largo para la plantilla. Acortalo antes de emitir.');
-        foreach($lines as $i=>$line)self::center($pdf,$line,'cormorantecap',$size,128.1+$i*$size*1.12*25.4/72,230,$size);
+        foreach($lines as $i=>$line)self::center($pdf,$line,'cormorantecap',$size,125+$i*$size*1.12*25.4/72,230,$size);
+        if (!empty($config['fecha_edicion'])) self::center($pdf,$config['fecha_edicion'],'montserratecap',9,155,230,9);
         if($preview){$pdf->SetTextColor(110,110,110);self::center($pdf,'VISTA PREVIA · SIN VALIDEZ','montserratecap',7,197,200,7);}
         $pdf->SetTitle('Certificado ECAP');$pdf->SetAuthor('ECAP');
         return $pdf->Output('','S');
