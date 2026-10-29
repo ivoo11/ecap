@@ -3712,3 +3712,8 @@ a {
 .alumno-evolution summary{cursor:pointer;font-weight:600;}
 .alumno-page .admin-table td:last-child{white-space:nowrap;}
 @media(max-width:760px){.alumno-stats,.alumno-filters{grid-template-columns:1fr;}.alumno-filter-search{grid-column:auto;}.alumno-stats{gap:0;}}
+.alumno-export-fields{border:0;padding:0;margin:0 0 24px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 20px;}
+.alumno-export-fields legend{font-weight:600;margin-bottom:20px;}
+.alumno-export-fields label{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer;}
+.alumno-export-fields input{width:18px;height:18px;flex-shrink:0;accent-color:#101d30;}
+@media(max-width:760px){.alumno-export-fields{grid-template-columns:1fr;}}
