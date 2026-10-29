@@ -3697,3 +3697,18 @@ a {
 .certificado-page--docentes .admin-table td[data-label]::before{content:attr(data-label);display:block;font-size:12px;color:#697586;margin-bottom:4px;}
 .certificado-page--docentes td small{overflow-wrap:anywhere;}
 }
+
+/* Resumen y filtros del directorio de alumnos */
+.alumno-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
+.alumno-stats a{display:flex;flex-direction:column;gap:8px;color:inherit;text-decoration:none;}
+.alumno-stats strong{font-size:32px;line-height:1.2;}
+.alumno-stats small{color:var(--admin-text-muted,#697586);}
+.alumno-stats a:focus-visible{outline:2px solid currentColor;outline-offset:3px;}
+.alumno-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:end;}
+.alumno-filters>div{min-width:0;}
+.alumno-filters label{display:block;margin-bottom:8px;font-weight:600;}
+.alumno-filters .admin-input{width:100%;min-width:0;box-sizing:border-box;}
+.alumno-filter-search{grid-column:span 2;}
+.alumno-evolution summary{cursor:pointer;font-weight:600;}
+.alumno-page .admin-table td:last-child{white-space:nowrap;}
+@media(max-width:760px){.alumno-stats,.alumno-filters{grid-template-columns:1fr;}.alumno-filter-search{grid-column:auto;}.alumno-stats{gap:0;}}
