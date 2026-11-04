@@ -82,13 +82,15 @@ require __DIR__ . '/../includes/header.php';
 <p>Nombre, apellido, título profesional, biografía y foto se muestran en la web. DNI y correo son datos internos.</p>
 <?php foreach (['dni'=>'DNI','nombre'=>'Nombre','apellido'=>'Apellido','email'=>'Correo electrónico','titulo_profesional'=>'Título profesional (ej. Dra.)'] as $key=>$label): ?>
 <div class="activity-editor-field"><label for="<?= $key ?>"><?= $label ?></label><input id="<?= $key ?>" name="<?= $key ?>" type="<?= $key==='email'?'email':'text' ?>" maxlength="<?= $key==='email'?190:($key==='dni'?9:100) ?>" value="<?= AdminForm::escape($valores[$key]) ?>" <?= $docente && $key!=='titulo_profesional' ? 'readonly' : '' ?> <?= $key==='dni'?'required':'' ?>></div>
+<?php if (!$docente && $key === 'dni'): ?><button class="activity-action-secondary" type="button" id="docente-persona-buscar">Buscar DNI</button><p id="docente-persona-status" role="status" aria-live="polite">Ingresá el DNI para consultar los datos existentes.</p><?php endif; ?>
 <?php endforeach; ?>
 <?php if ($docente): ?><p>Nombre, apellido, DNI y correo se editan en la ficha compartida de la persona.</p><p><a class="activity-action-secondary" href="/admin/alumnos/editar.php?id=<?= (int)$docente['persona_id'] ?>&amp;docente=<?= (int)$id ?>">Editar datos personales</a></p><?php endif; ?>
-<?php if ($personaExistente): ?><p><?= AdminForm::escape($personaExistente['nombre'].' '.$personaExistente['apellido']) ?> ya está registrado con este DNI.</p><p><label><input type="checkbox" name="vincular" value="<?= (int)$personaExistente['id'] ?>" required> Vincular esa persona conservando sus datos existentes.</label></p><?php endif; ?>
+<?php if ($personaExistente): ?><div id="docente-vinculacion-fallback"><p><?= AdminForm::escape($personaExistente['nombre'].' '.$personaExistente['apellido']) ?> ya está registrado con este DNI.</p><p><label><input type="checkbox" name="vincular" value="<?= (int)$personaExistente['id'] ?>" required> Vincular esa persona conservando sus datos existentes.</label></p></div><?php endif; ?>
 <div class="activity-editor-field"><label for="bio">Biografía</label><textarea id="bio" name="bio" rows="7"><?= AdminForm::escape($valores['bio']) ?></textarea></div>
 <?php if (!empty($docente['foto'])): ?><p><a href="<?= AdminForm::escape(PublicImage::url('docentes', $docente['foto'])) ?>" target="_blank" rel="noopener">Ver foto actual</a></p><p><label><input type="checkbox" name="quitar_foto" value="1"> Quitar foto del perfil</label></p><?php endif; ?>
 <div class="activity-editor-field"><label for="foto">Foto (JPG, PNG o WebP, hasta 2 MB)</label><input id="foto" type="file" name="foto" accept="image/jpeg,image/png,image/webp"><p>Si hay un error al guardar, seleccioná el archivo nuevamente.</p></div>
 <p><label><input type="checkbox" name="activo" value="1" <?= $activo?'checked':'' ?>> Perfil activo</label></p><p>Un perfil inactivo deja de mostrarse en las actividades públicas.</p>
 </div><footer class="activity-editor-actions"><a class="activity-action-secondary" href="/admin/docentes/">Volver</a><button class="activity-action-primary" type="submit">Guardar docente</button></footer></section></form>
 </section>
+<?php if (!$docente): ?><script src="/assets/admin/js/docente-persona.js" defer></script><?php endif; ?>
 <?php require __DIR__ . '/../includes/footer.php'; ?>
