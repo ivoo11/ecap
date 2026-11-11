@@ -147,6 +147,11 @@ final class CorreoControl
         $esperado=$hayClases && $desde && $desde<=date('Y-m-d').' 07:00:00' && date('H:i')>='07:40';
         $hoy=$last && substr($last['inicio'],0,10)===date('Y-m-d');
         $alerta=$esperado && (!$hoy || $last['estado']!=='completado');
+        if($alerta){
+            require_once __DIR__.'/CorreoPanel.php';
+            $resumen=(new CorreoPanel($this->pdo))->recordatoriosHoy();
+            $alerta=(bool)array_filter($resumen,static fn($r)=>(int)$r['aceptados']<(int)$r['destinatarios']);
+        }
         return ['ultima'=>$last,'alerta'=>$alerta,'desde'=>$desde];
     }
 }
