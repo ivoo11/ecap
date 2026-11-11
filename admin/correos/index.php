@@ -40,6 +40,7 @@ require __DIR__.'/../includes/header.php';
 ?>
 <section class="admin-page correo-page">
 <header class="admin-page__header"><div><h1>Control de correos</h1><p><?= count($pendientes) ?> correos requieren atención · Confirmaciones, recordatorios y certificados.</p></div><?php if($edicion): ?><a class="activity-action-secondary" href="/admin/actividades/ediciones/editar.php?id=<?= $edicion ?>">Volver a la edición</a><?php endif; ?><a class="activity-action-secondary" href="/admin/correos/historial.php<?= $edicion?'?edicion='.$edicion:'' ?>">Historial de envíos</a></header>
+<?php $edicionRecordatorios=$edicion; require __DIR__.'/../includes/recordatorios-resumen.php'; ?>
 <?php if($error): ?><div class="admin-alert admin-alert--error" role="alert"><?= AdminForm::escape($error) ?></div><?php endif; ?>
 <?php if(isset($_GET['guardado'])): ?><div class="edition-message edition-message--success" role="status">Correo enviado. Ya no requiere atención.</div><?php endif; ?>
 <?php if(isset($_GET['descartado'])): ?><div class="edition-message edition-message--success" role="status">Aviso descartado. El historial se conserva y no se envió ningún correo.</div><?php endif; ?>

@@ -11,7 +11,7 @@ final class CorreoPanel
         $sql="SELECT c.id,c.edicion_id,c.fecha_inicio,a.titulo,COUNT(i.id) AS destinatarios,
         SUM(CASE WHEN ct.estado='enviado' THEN 1 ELSE 0 END) AS aceptados,
         SUM(CASE WHEN ct.estado='error' THEN 1 ELSE 0 END) AS errores,
-        SUM(CASE WHEN ct.estado='pendiente' AND EXISTS(SELECT 1 FROM correo_intentos ci WHERE ci.comunicacion_id=ct.id AND ci.resultado='incierto') THEN 1 ELSE 0 END) AS revision,
+        SUM(CASE WHEN ct.estado='pendiente' AND EXISTS(SELECT 1 FROM correo_intentos ci WHERE ci.comunicacion_id=ct.id AND ci.resultado='incierto' AND ci.id=(SELECT MAX(ultimo.id) FROM correo_intentos ultimo WHERE ultimo.comunicacion_id=ct.id)) THEN 1 ELSE 0 END) AS revision,
         MAX(ct.enviado_en) AS ultimo_aceptado,
         SUM(CASE WHEN ct.estado='enviado' AND EXISTS(SELECT 1 FROM correo_intentos ci WHERE ci.comunicacion_id=ct.id AND ci.resultado='enviado' AND ci.origen IN ('manual','recuperacion')) THEN 1 ELSE 0 END) AS recuperados
         FROM clases c JOIN ediciones e ON e.id=c.edicion_id JOIN actividades a ON a.id=e.actividad_id

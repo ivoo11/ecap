@@ -2,7 +2,14 @@
 set -euo pipefail
 
 ECAP_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-ECAP_PHP="${ECAP_PHP:-php}"
+# El PHP del sitio y el PHP CLI predeterminado pueden ser distintos en Hostinger.
+if [[ -z "${ECAP_PHP:-}" ]]; then
+    if [[ -x /opt/alt/php83/usr/bin/php ]]; then
+        ECAP_PHP=/opt/alt/php83/usr/bin/php
+    else
+        ECAP_PHP=php
+    fi
+fi
 
 if ! command -v "$ECAP_PHP" >/dev/null 2>&1; then
     printf '%s\n' 'ERROR: PHP CLI no está disponible. Configurar ECAP_PHP con la ruta de PHP 8.3 del hosting.' >&2

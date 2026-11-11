@@ -41,6 +41,7 @@ require __DIR__ . '/includes/header.php';
 
     </header>
 
+    <?php require __DIR__.'/includes/recordatorios-resumen.php'; ?>
     <section class="admin-card correo-cron">
         <h2>Correos automáticos</h2>
         <p><?= count($correosPendientes) ? count($correosPendientes).' correos requieren atención.' : 'Sin correos pendientes de atención para actividades vigentes.' ?></p>
