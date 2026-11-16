@@ -443,6 +443,7 @@ require __DIR__ . '/../../includes/header.php';
         </span>
 
         <a class="edition-admin-nav__item" href="/admin/correos/?edicion=<?= (int)$edicionId ?>">Correos<?= $correosAtencion ? ' ('.$correosAtencion.')' : '' ?></a>
+        <?php if(Auth::hasRole('superadmin')): ?><a class="edition-admin-nav__item" href="/admin/novedades/?edicion=<?= (int)$edicionId ?>">Anunciar actividad</a><?php endif ?>
         <a class="edition-admin-nav__item" href="/admin/actividades/ediciones/certificados.php?id=<?= (int)$edicionId ?>">Certificados</a>
         <span class="edition-admin-nav__item">
             Materiales
