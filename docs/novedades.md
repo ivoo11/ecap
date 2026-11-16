@@ -1,6 +1,6 @@
 # Anuncios de actividades
 
-Implementación preparada; no habilitada en producción ni enviada a destinatarios reales.
+Publicada el 16/11/2026. Tablas creadas y prueba única autorizada enviada a ivanmontano87@gmail.com; aceptación confirmada por el transporte. Borrador de edición 5 guardado, 224 destinatarios elegibles. Ninguna campaña iniciada. Herramientas temporales de instalación y prueba retiradas tras su uso. Pendiente confirmar recepción/diseño con el usuario y configurar cron de novedades.
 
 ## Operación
 
