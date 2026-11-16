@@ -63,16 +63,43 @@ $pageTitle='Anunciar actividad';require __DIR__.'/../includes/header.php';
 <form method="post"><?= Csrf::field() ?><input type="hidden" name="accion" value="iniciar"><input type="hidden" name="huella" value="<?= $svc->huella($c,$dest) ?>"><button class="admin-button" type="submit">Confirmar envío a <?= count($dest) ?> direcciones</button></form>
 <?php endif ?></section>
 <?php elseif($c): ?>
-<section class="admin-card"><h2>Resultado del anuncio</h2><p>Estado: <?= AdminForm::escape($c['estado']==='en_cola'?'Enviando':ucfirst($c['estado'])) ?></p><p><?php foreach($labels as $key=>$label): ?><?= $label ?>: <?= $counts[$key]??0 ?> · <?php endforeach ?></p>
-<p>El envío comienza al confirmar y procesa toda la lista de forma continua. Esta pantalla actualiza el progreso automáticamente. Las bajas se respetan antes de cada envío.</p>
+<section class="admin-card" id="resultado-anuncio" data-activo="<?= $c['estado']==='en_cola'?'1':'0' ?>"><h2>Resultado del anuncio</h2><p data-resumen>Estado: <?= AdminForm::escape($c['estado']==='en_cola'?'Enviando':ucfirst($c['estado'])) ?></p><p data-resumen><?php foreach($labels as $key=>$label): ?><?= $label ?>: <?= $counts[$key]??0 ?> · <?php endforeach ?></p>
+<p role="status" id="actualizacion-anuncio">Actualizando el estado automáticamente.</p><p>El envío comienza al confirmar y procesa toda la lista de forma continua. Esta pantalla actualiza el progreso automáticamente. Las bajas se respetan antes de cada envío.</p>
 <?php if(($counts['pendiente']??0)>0&&$c['estado']==='en_cola'): ?><form method="post"><?= Csrf::field() ?><input type="hidden" name="accion" value="tanda"><button class="admin-button" type="submit">Enviar pendientes ahora</button></form><?php endif ?>
 <?php if(in_array($c['estado'],['en_cola','pausada'],true)): ?><form method="post" style="margin:16px 0"><?= Csrf::field() ?><input type="hidden" name="accion" value="<?= $c['estado']==='en_cola'?'pausar':'continuar' ?>"><button class="activity-action-secondary" type="submit"><?= $c['estado']==='en_cola'?'Pausar anuncio':'Continuar anuncio' ?></button></form><?php endif ?>
 <div class="admin-table-wrapper"><table class="admin-table"><thead><tr><th>Persona</th><th>Correo</th><th>Estado</th><th>Detalle</th><th>Acción</th></tr></thead><tbody>
-<?php foreach($rows as $r): ?><tr><td><?= AdminForm::escape($r['nombre'].' '.$r['apellido']) ?></td><td><?= AdminForm::escape($r['email']) ?></td><td><?= $labels[$r['estado']]??AdminForm::escape($r['estado']) ?></td><td><?= AdminForm::escape($r['motivo']?:$r['enviado_en']) ?><?php if($r['ultimo_intento']): ?><br><small><?= AdminForm::escape($r['ultimo_intento'].' · '.$r['ultima_fase'].($r['smtp_codigo']?' · SMTP '.$r['smtp_codigo']:'')) ?></small><?php endif ?></td><td><?php if($r['estado']==='error'): ?><form method="post"><?= Csrf::field() ?><input type="hidden" name="accion" value="reintentar"><input type="hidden" name="destinatario" value="<?= (int)$r['id'] ?>"><button class="activity-action-secondary" type="submit">Reintentar</button></form><?php endif ?></td></tr><?php endforeach ?>
+<?php foreach($rows as $r): ?><tr data-destinatario="<?= (int)$r['id'] ?>"><td><?= AdminForm::escape($r['nombre'].' '.$r['apellido']) ?></td><td><?= AdminForm::escape($r['email']) ?></td><td><?= $labels[$r['estado']]??AdminForm::escape($r['estado']) ?></td><td><?= AdminForm::escape($r['motivo']?:$r['enviado_en']) ?><?php if($r['ultimo_intento']): ?><br><small><?= AdminForm::escape($r['ultimo_intento'].' · '.$r['ultima_fase'].($r['smtp_codigo']?' · SMTP '.$r['smtp_codigo']:'')) ?></small><?php endif ?></td><td><?php if($r['estado']==='error'): ?><form method="post"><?= Csrf::field() ?><input type="hidden" name="accion" value="reintentar"><input type="hidden" name="destinatario" value="<?= (int)$r['id'] ?>"><button class="activity-action-secondary" type="submit">Reintentar</button></form><?php endif ?></td></tr><?php endforeach ?>
 </tbody></table></div><p>“Enviado” indica que el servidor aceptó el correo. No confirma su llegada a la bandeja de entrada.</p></section>
 <?php endif ?>
 </section>
 <?php if($c&&$c['estado']==='en_cola'): ?>
-<script>setTimeout(function(){if(!document.hidden)location.replace('/admin/novedades/?edicion=<?= $id ?>');},5000);</script>
+<script>
+(function(){
+ const panel=document.getElementById('resultado-anuncio');
+ const aviso=document.getElementById('actualizacion-anuncio');
+ async function actualizar(){
+  try{
+   if(document.hidden)return;
+   const respuesta=await fetch('/admin/novedades/?edicion=<?= $id ?>',{cache:'no-store',credentials:'same-origin'});
+   if(!respuesta.ok||respuesta.redirected)throw new Error('sesion');
+   const doc=new DOMParser().parseFromString(await respuesta.text(),'text/html');
+   const nuevo=doc.getElementById('resultado-anuncio');
+   if(!nuevo)throw new Error('respuesta');
+   panel.querySelectorAll('[data-resumen]').forEach((el,i)=>{el.textContent=nuevo.querySelectorAll('[data-resumen]')[i].textContent;});
+   nuevo.querySelectorAll('tr[data-destinatario]').forEach(fila=>{
+    const actual=panel.querySelector('tr[data-destinatario="'+fila.dataset.destinatario+'"]');
+    if(actual)Array.from(fila.cells).forEach((celda,i)=>{
+     if(actual.cells[i].innerHTML!==celda.innerHTML&&!actual.cells[i].contains(document.activeElement))actual.cells[i].innerHTML=celda.innerHTML;
+    });
+   });
+   panel.dataset.activo=nuevo.dataset.activo;
+   if(panel.dataset.activo!=='1')panel.querySelectorAll(':scope > form').forEach(f=>{f.hidden=true;});
+   aviso.textContent='Estado actualizado a las '+new Date().toLocaleTimeString('es-AR')+'.';
+  }catch(error){aviso.textContent='No pudimos actualizar el estado. Volveremos a consultar automáticamente; esto no detiene el envío.';}
+  finally{if(panel.dataset.activo==='1')setTimeout(actualizar,5000);}
+ }
+ setTimeout(actualizar,5000);
+})();
+</script>
 <?php endif ?>
 <?php require __DIR__.'/../includes/footer.php'; ?>
