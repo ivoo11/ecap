@@ -72,10 +72,12 @@ final class Novedades
    $limite=max(0,min(5,100-$usados));if(!$limite)return 0;
    $q=$this->db->query("SELECT d.*,c.asunto,c.contenido,c.edicion_id FROM novedades_destinatarios d JOIN novedades_campanas c ON c.id=d.campana_id JOIN ediciones e ON e.id=c.edicion_id JOIN actividades a ON a.id=e.actividad_id WHERE d.estado='pendiente' AND c.estado='en_cola' AND a.estado='publicada' AND e.estado='inscripcion_abierta' AND e.fecha_inicio>NOW() ".($campana?" AND c.id=".(int)$campana:"")." ORDER BY d.id LIMIT ".$limite);
    foreach($q->fetchAll(PDO::FETCH_ASSOC) as $r){
+    $actual=$this->db->prepare("SELECT d.estado FROM novedades_destinatarios d JOIN novedades_campanas c ON c.id=d.campana_id WHERE d.id=? AND c.estado='en_cola'");$actual->execute([$r['id']]);
+    if($actual->fetchColumn()!=='pendiente')continue;
     if(!$this->disponible($this->edicion((int)$r['edicion_id'])))continue;
     $valido=$this->db->prepare("SELECT p.id FROM personas p JOIN consentimientos c ON c.id=(SELECT MAX(x.id) FROM consentimientos x WHERE x.persona_id=p.id AND x.tipo='email_marketing') WHERE p.id=? AND LOWER(TRIM(p.email))=? AND p.estado='activo' AND c.aceptado=1 AND NOT EXISTS(SELECT 1 FROM novedades_bajas b WHERE b.email=?)");$valido->execute([$r['persona_id'],$r['email'],$r['email']]);
     if(!$valido->fetchColumn()){$this->db->prepare("UPDATE novedades_destinatarios SET estado='omitido',motivo='Cambió el consentimiento, la dirección o el estado de la persona.' WHERE id=?")->execute([$r['id']]);continue;}
-    $this->db->prepare("UPDATE novedades_destinatarios SET estado='enviando',motivo=NULL WHERE id=?")->execute([$r['id']]);
+    $claim=$this->db->prepare("UPDATE novedades_destinatarios SET estado='enviando',motivo=NULL WHERE id=? AND estado='pendiente'");$claim->execute([$r['id']]);if(!$claim->rowCount())continue;
     $message='<novedad-'.bin2hex(random_bytes(16)).'@ecap.com.ar>';
     $this->db->prepare('INSERT INTO novedades_intentos(destinatario_id,message_id) VALUES(?,?)')->execute([$r['id'],$message]);$intento=(int)$this->db->lastInsertId();
     $smtp=null;
@@ -84,7 +86,7 @@ final class Novedades
      if(!Environment::isLocal()){$smtp=new NovedadSMTP($this->db,$intento);$smtp->Timeout=15;$smtp->Timelimit=20;$mail->setSMTPInstance($smtp);}
      $mail->addAddress($r['email']);$mail->Subject=$r['asunto'];$mail->isHTML(true);
      $mail->Body=str_replace('__BAJA_TOKEN__',$r['token'],$r['contenido']);
-     $mail->AltBody=html_entity_decode(strip_tags(str_replace(['</p>','<br>'],"\n",$mail->Body)),ENT_QUOTES,'UTF-8')."\nDejar de recibir novedades: https://ecap.com.ar/novedades/baja.php?token=".$r['token'];
+     $mail->AltBody=html_entity_decode(strip_tags(str_replace(['</p>','<br>'],"\n",preg_replace('~<style\b[^>]*>.*?</style>~is','',$mail->Body))),ENT_QUOTES,'UTF-8')."\nDejar de recibir novedades: https://ecap.com.ar/novedades/baja.php?token=".$r['token'];
      if(!$mail->send())throw new RuntimeException('Transporte sin confirmación.');
      $this->db->prepare("UPDATE novedades_intentos SET fase='aceptado',terminado_en=NOW() WHERE id=?")->execute([$intento]);
      $this->db->prepare("UPDATE novedades_destinatarios SET estado='enviado',enviado_en=NOW() WHERE id=?")->execute([$r['id']]);$enviados++;
