@@ -67,10 +67,7 @@ final class Novedades
    $this->db->exec("UPDATE novedades_destinatarios d JOIN novedades_intentos i ON i.id=(SELECT MAX(x.id) FROM novedades_intentos x WHERE x.destinatario_id=d.id) SET d.estado='enviado',d.enviado_en=i.iniciado_en,d.motivo=NULL WHERE d.estado='enviando' AND i.fase='aceptado'");
    // Los intentos abandonados no se reenvían automáticamente: podrían haber sido aceptados.
    $this->db->exec("UPDATE novedades_destinatarios SET estado='revision',motivo='El envío se interrumpió. Revisar el último intento antes de reenviar.' WHERE estado='enviando'");
-   // Límite conservador propio: nunca consume más de 100 intentos de novedades en 24 horas.
-   $usados=(int)$this->db->query('SELECT COUNT(*) FROM novedades_intentos WHERE iniciado_en>DATE_SUB(NOW(),INTERVAL 24 HOUR)')->fetchColumn();
-   $limite=max(0,min(5,100-$usados));if(!$limite)return 0;
-   $q=$this->db->query("SELECT d.*,c.asunto,c.contenido,c.edicion_id FROM novedades_destinatarios d JOIN novedades_campanas c ON c.id=d.campana_id JOIN ediciones e ON e.id=c.edicion_id JOIN actividades a ON a.id=e.actividad_id WHERE d.estado='pendiente' AND c.estado='en_cola' AND a.estado='publicada' AND e.estado='inscripcion_abierta' AND e.fecha_inicio>NOW() ".($campana?" AND c.id=".(int)$campana:"")." ORDER BY d.id LIMIT ".$limite);
+   $q=$this->db->query("SELECT d.*,c.asunto,c.contenido,c.edicion_id FROM novedades_destinatarios d JOIN novedades_campanas c ON c.id=d.campana_id JOIN ediciones e ON e.id=c.edicion_id JOIN actividades a ON a.id=e.actividad_id WHERE d.estado='pendiente' AND c.estado='en_cola' AND a.estado='publicada' AND e.estado='inscripcion_abierta' AND e.fecha_inicio>NOW() ".($campana?" AND c.id=".(int)$campana:"")." ORDER BY d.id");
    foreach($q->fetchAll(PDO::FETCH_ASSOC) as $r){
     $actual=$this->db->prepare("SELECT d.estado FROM novedades_destinatarios d JOIN novedades_campanas c ON c.id=d.campana_id WHERE d.id=? AND c.estado='en_cola'");$actual->execute([$r['id']]);
     if($actual->fetchColumn()!=='pendiente')continue;

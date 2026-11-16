@@ -18,4 +18,15 @@ ok($s->procesar((int)$c['id'])===1,'Captura un correo local y excluye la baja pe
 ok($s->procesar((int)$c['id'])===0,'Segunda ejecución no duplica envíos');
 $rows=$s->resultados((int)$c['id']);ok($rows[0]['estado']==='enviado'&&$rows[1]['estado']==='omitido','Resultados individuales persistidos');
 $s->reintentar((int)$c['id'],(int)$rows[0]['id']);ok($s->resultados((int)$c['id'])[0]['estado']==='enviado','No permite reintentar un envío exitoso');
+// Una nueva campaña supera los antiguos límites de 5 y 100 en una sola ejecución.
+for($i=3;$i<=226;$i++){
+ $db->exec("INSERT INTO personas VALUES($i,'Prueba','Masiva','activo','persona$i@example.test')");
+ $db->exec("INSERT INTO consentimientos(persona_id,tipo,aceptado) VALUES($i,'email_marketing',1)");
+}
+$db->exec("INSERT INTO ediciones VALUES(2,1,'2099-11-20 14:00:00','online','inscripcion_abierta',1000,NULL,NULL)");
+$s->guardar(2,'Nueva actividad masiva','Invitación de prueba masiva, sin envíos reales.',1);
+$masiva=$s->campana(2);$s->iniciar(2,$s->huella($masiva,$s->elegibles()));
+ok($s->procesar((int)$masiva['id'])===225,'Procesa 225 destinatarios seguidos en una ejecución');
+ok($s->procesar((int)$masiva['id'])===0,'No duplica la campaña masiva');
+ok($s->campana(2)['estado']==='completada','La campaña queda completada');
 $db->exec('DROP DATABASE ecap_novedades_test');
