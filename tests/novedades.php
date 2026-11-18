@@ -20,3 +20,7 @@ check(str_contains($html,'align="center"><tr><td align="center"'),'Botón centra
 check(str_contains($html,'__BAJA_TOKEN__'),'Baja individual prevista');
 check(str_contains($html,'Nueva actividad para vos'),'Contexto institucional');
 file_put_contents('/tmp/ecap-novedad-test.html',$html);
+
+check(!str_contains($html,'background-image:')&&!str_contains($html,'background-size:'),'Placa sin fondo que pueda estirarse');
+check(str_contains($html,'width:100%;max-width:540px;height:auto'),'Imagen fluida con proporción natural sin depender de media queries');
+check(!str_contains($html,'font-size:78px')&&!str_contains($html,'height:330px'),'Sin fecha superpuesta ni altura fija');
