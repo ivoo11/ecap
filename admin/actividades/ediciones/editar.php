@@ -507,7 +507,7 @@ require __DIR__ . '/../../includes/header.php';
 
                 <p>
                     Buscá por DNI una persona previamente registrada
-                    en ECAP.
+                    en ECAP. Si no quedan lugares, el cupo se amplía automáticamente para esta persona.
                 </p>
 
             </div>

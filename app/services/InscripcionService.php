@@ -145,7 +145,7 @@ final class InscripcionService
 
         /*
         |--------------------------------------------------------------------------
-        | Validar cupo
+        | Reservar cupo administrativo en la misma transacción
         |--------------------------------------------------------------------------
         */
 
@@ -170,9 +170,10 @@ final class InscripcionService
             $inscriptosConfirmados = (int) $stmt->fetchColumn();
 
             if ($inscriptosConfirmados >= $cupoMaximo) {
-                throw new RuntimeException(
-                    'La edición alcanzó el cupo máximo.'
-                );
+                // El bloqueo de edición también lo utiliza la inscripción pública.
+                // El cupo extra y su ocupación se confirman juntos: no hay vacante intermedia.
+                $this->pdo->prepare('UPDATE ediciones SET cupo_maximo = :cupo WHERE id = :id')
+                    ->execute(['cupo' => $inscriptosConfirmados + 1, 'id' => $edicionId]);
             }
         }
 
