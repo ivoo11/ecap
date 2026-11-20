@@ -3,6 +3,8 @@ declare(strict_types=1);
 require_once __DIR__.'/../../includes/bootstrap.php';
 require_once __DIR__.'/../../../app/services/AdminForm.php';
 require_once __DIR__.'/../../../app/services/CertificadoDocenteService.php';
+require_once __DIR__.'/../../../app/services/CertificadoCola.php';
+$cola=CertificadoCola::production();
 $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT)?:0;
 $docentes=($_GET['destinatarios']??'')==='docentes';
 $destinatarios=$docentes?'docentes':'participantes';
@@ -10,6 +12,10 @@ $service=$docentes?new CertificadoDocenteService($pdo):new CertificadoService($p
 try{$edicion=$service->edicion($id);$config=$service->config($id);}catch(DomainException $e){http_response_code(404);exit(AdminForm::escape($e->getMessage()));}
 $error=null;$confirmar=null;$rows=$service->participantes($id);
 header('Cache-Control: no-store');
+if(isset($_GET['estado_lotes'])){
+    session_write_close();header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(array_map([CertificadoCola::class,'resumen'],$cola->listado($id,$destinatarios)));exit;
+}
 if(isset($_GET['pdf'])){
     try{
         $ins=(int)($_GET['persona']??0);$person=null;foreach($rows as $p)if((int)$p['id']===$ins)$person=$p;
@@ -26,16 +32,21 @@ if(isset($_GET['pdf'])){
 }
 if($_SERVER['REQUEST_METHOD']==='POST'){
     AdminForm::csrf();$accion=AdminForm::text('accion');
-    if($accion==='procesar'){
-        header('Content-Type: application/json; charset=utf-8');$token=AdminForm::text('lote');$lote=$_SESSION['certificado_lotes'][$token]??null;$ins=(int)AdminForm::text('persona');
-        try{
-            if(!$lote || ($lote['destinatarios']??'participantes')!==$destinatarios || $lote['edicion']!==$id || $lote['vence']<time() || !isset($lote['personas'][$ins]))throw new DomainException('La selección venció. Revisá los participantes nuevamente.');
-            if(isset($lote['resultados'][$ins])){echo json_encode($lote['resultados'][$ins]);exit;}
-            $sent=$docentes?$service->enviar($id,$ins,(int)Auth::id(),$lote['personas'][$ins],$lote['revision'],false,$lote['roles'][$ins]):$service->enviar($id,$ins,(int)Auth::id(),$lote['personas'][$ins],$lote['revision']);
-            $result=['ok'=>true,'mensaje'=>$sent?'Correo enviado':'Ya estaba enviado'];
-        }catch(Throwable $e){error_log('ECAP certificados: '.$e->getMessage());$result=['ok'=>false,'mensaje'=>$e instanceof DomainException?$e->getMessage():'No se pudo completar. Revisá el estado antes de reintentar.'];}
-        if($lote && ($lote['destinatarios']??'participantes')===$destinatarios && $lote['edicion']===$id && isset($lote['personas'][$ins]))$_SESSION['certificado_lotes'][$token]['resultados'][$ins]=$result;
-        echo json_encode($result);exit;
+    if($accion==='iniciar_lote'){
+        header('Content-Type: application/json; charset=utf-8');
+        try {
+            if(!function_exists('fastcgi_finish_request') && !function_exists('litespeed_finish_request'))throw new DomainException('El servidor no permite iniciar el envío en segundo plano. Contactá al soporte de ECAP.');
+            $token=AdminForm::text('lote');$selection=$_SESSION['certificado_lotes'][$token]??null;
+            $existing=$cola->leer($token);
+            if(!$existing && (!$selection || $selection['edicion']!==$id || $selection['destinatarios']!==$destinatarios))throw new DomainException('La selección venció. Volvé a revisarla.');
+            if($existing && ($existing['edicion']!==$id || $existing['destinatarios']!==$destinatarios))throw new DomainException('Tanda inválida.');
+            $job=$existing?:$cola->iniciar($token,$selection,(int)Auth::id());
+            session_write_close();ignore_user_abort(true);set_time_limit(0);
+            echo json_encode(['ok'=>true,'lote'=>CertificadoCola::resumen($job)]);
+            if(function_exists('fastcgi_finish_request'))fastcgi_finish_request();else litespeed_finish_request();
+            try{$cola->ejecutar($pdo);}catch(Throwable $e){error_log('ECAP certificados cola: '.$e->getMessage());}
+            exit;
+        }catch(Throwable $e){http_response_code(422);echo json_encode(['ok'=>false,'mensaje'=>$e instanceof DomainException?$e->getMessage():'No se pudo iniciar la tanda. Volvé a intentar.']);exit;}
     }
     try{
         if($accion==='guardar'){
@@ -70,21 +81,23 @@ $pageTitle='Certificados';$pageSection='actividades';require __DIR__.'/../../inc
 <?php if($error):?><div class="admin-alert admin-alert--error" role="alert"><?= AdminForm::escape($error) ?></div><?php endif;?>
 <?php if(isset($_GET['guardado'])):?><div class="edition-message edition-message--success" role="status">Plantilla guardada. Revisá la vista previa antes de emitir.</div><?php endif;?>
 <?php if(!$finished):?><div class="admin-card"><p>Podés preparar la plantilla ahora. La emisión estará disponible cuando termine la edición.</p></div><?php endif;?>
+<section class="admin-card" id="certificado-tandas"><h2>Progreso de envíos</h2>
+<p>Las tandas confirmadas se guardan y siguen en segundo plano, aunque pases a docentes o cierres esta pantalla. Si el servidor interrumpe el proceso, los pendientes se recuperan en la siguiente ejecución de respaldo.</p>
+<div id="certificado-tandas-lista"></div><p id="certificado-tandas-estado" role="status" aria-live="polite"></p>
+</section>
 <?php if($confirmar):?>
-<section class="admin-card"><h2>Revisar <?= count($confirmar) ?> destinatarios</h2><p><?= $docentes?'Confirmás la participación de los docentes seleccionados en el carácter indicado.':'Confirmás que estas personas cumplen el criterio de asistencia.' ?> Se emitirá un certificado por persona y se enviará como PDF adjunto.</p><p>Los certificados ya emitidos conservarán su contenido original. Mantené esta página abierta mientras se procesan los envíos.</p>
+<section class="admin-card"><h2>Revisar <?= count($confirmar) ?> destinatarios</h2><p><?= $docentes?'Confirmás la participación de los docentes seleccionados en el carácter indicado.':'Confirmás que estas personas cumplen el criterio de asistencia.' ?> Se emitirá un certificado por persona y se enviará como PDF adjunto.</p><p>Los certificados ya emitidos conservarán su contenido original. Al confirmar, la tanda queda guardada y continúa en segundo plano. Podés cambiar de pantalla o cerrar el navegador.</p>
 <div class="certificado-actions"><a class="activity-action-secondary" target="_blank" rel="noopener" href="certificados.php?id=<?= $id ?><?= $docentes?'&amp;destinatarios=docentes':'' ?>&pdf=previa&persona=<?= (int)$confirmar[0]['id'] ?><?= $docentes?'&amp;rol='.urlencode($roles[$confirmar[0]['id']]):'' ?>">Ver certificado de muestra</a><button type="button" class="admin-button" id="certificado-enviar">Emitir y enviar (<?= count($confirmar) ?>)</button><a class="activity-action-secondary" href="certificados.php?id=<?= $id ?><?= $docentes?'&amp;destinatarios=docentes':'' ?>">Volver a la selección</a></div>
 <p id="certificado-progreso" role="status" aria-live="polite"></p>
 <table class="admin-table"><thead><tr><th>Persona</th><th>Resultado</th></tr></thead><tbody><?php foreach($confirmar as $p):?><tr data-envio="<?= (int)$p['id'] ?>"><td><?= AdminForm::escape($p['nombre'].' '.$p['apellido']) ?><small><?= AdminForm::escape($p['email']) ?></small><?php if($docentes):?><small><?= AdminForm::escape(CertificadoDocenteService::ROLES[$roles[$p['id']]]) ?></small><?php endif;?></td><td data-resultado>Por enviar</td></tr><?php endforeach;?></tbody></table>
 <form id="certificado-lote" hidden><?= Csrf::field() ?><input name="lote" value="<?= $token ?>"></form></section>
 <script>
 document.getElementById('certificado-enviar').addEventListener('click',async function(){
- this.disabled=true;const rows=[...document.querySelectorAll('[data-envio]')],status=document.getElementById('certificado-progreso');let done=0,failed=0;
- for(const row of rows){const data=new FormData(document.getElementById('certificado-lote'));data.set('accion','procesar');data.set('persona',row.dataset.envio);row.querySelector('[data-resultado]').textContent='Procesando…';
- try{const response=await fetch(location.href,{method:'POST',body:data});if(!response.ok)throw new Error();const result=await response.json();row.querySelector('[data-resultado]').textContent=result.mensaje;if(!result.ok)failed++;}
- catch(e){row.querySelector('[data-resultado]').textContent='Resultado sin confirmar. Revisá la lista antes de reintentar.';status.textContent='Se interrumpió el proceso. Los restantes no se enviaron; volvé a la selección para revisar los estados.';return;}
- done++;status.textContent=`${done} de ${rows.length} procesados · ${failed} requieren revisión.`;
- }
- this.textContent='Proceso terminado';
+ this.disabled=true;const status=document.getElementById('certificado-progreso');status.textContent='Guardando la tanda…';
+ const data=new FormData(document.getElementById('certificado-lote'));data.set('accion','iniciar_lote');
+ try{const response=await fetch(location.href,{method:'POST',body:data});const result=await response.json();if(!response.ok||!result.ok)throw new Error(result.mensaje||'No se pudo iniciar.');
+ this.textContent='Envío iniciado';status.textContent='La tanda quedó guardada. Podés salir de esta pantalla; el envío continúa en segundo plano.';window.actualizarCertificados();}
+ catch(e){status.textContent='No pudimos confirmar el inicio. Consultá el progreso de abajo o volvé a tocar el botón: no se duplicará la tanda.';this.disabled=false;}
 });
 </script>
 <?php else:?>
@@ -115,5 +128,33 @@ form.addEventListener('change',e=>{update();if(e.target.matches('.certificado-ro
 document.getElementById('certificado-buscar').addEventListener('input',e=>{rows.forEach(r=>r.hidden=!r.dataset.persona.includes(e.target.value.toLocaleLowerCase().trim()));update();});})();
 </script>
 <?php endif;?>
+
+<script>
+(()=>{
+ const nombres=<?= json_encode(array_column(array_map(fn($p)=>['id'=>$p['id'],'nombre'=>trim($p['nombre'].' '.$p['apellido'])],$rows),'nombre','id'),JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
+ const list=document.getElementById('certificado-tandas-lista'),notice=document.getElementById('certificado-tandas-estado');let busy=false,timer;
+ async function update(){
+  if(busy)return;busy=true;clearTimeout(timer);
+  try{
+   const url=new URL(location.href);url.searchParams.set('estado_lotes','1');
+   const response=await fetch(url,{cache:'no-store'});if(!response.ok||response.redirected)throw new Error();const jobs=await response.json();
+   for(const job of jobs){
+    let box=document.getElementById('tanda-'+job.token);
+    if(!box){box=document.createElement('div');box.id='tanda-'+job.token;const title=document.createElement('p');title.dataset.resumen='';box.append(title);const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Ver destinatarios';details.append(summary);const ul=document.createElement('ul');details.append(ul);box.append(details);list.append(box);}
+    const c=job.conteos,remaining=c.pendiente+c.procesando;
+    box.querySelector('[data-resumen]').textContent=new Date(job.creado*1000).toLocaleString('es-AR')+' · '+c.enviado+' de '+job.total+' enviados · '+remaining+' pendientes · '+c.revision+' para revisar'+(remaining===0?' · Tanda finalizada':'');
+    for(const [id,item] of Object.entries(job.items)){
+     let line=box.querySelector('[data-item="'+id+'"]');if(!line){line=document.createElement('li');line.dataset.item=id;box.querySelector('ul').append(line);}line.textContent=(nombres[id]||'Destinatario '+id)+' · '+item.mensaje;
+     const selected=document.querySelector('[data-envio="'+id+'"] [data-resultado]');
+     if(selected && document.querySelector('#certificado-lote input[name="lote"]')?.value===job.token)selected.textContent=item.mensaje;
+    }
+   }
+   notice.textContent=jobs.length?'Estado actualizado. Los casos para revisar se consultan en la lista de participantes o en Control de correos.':'Todavía no hay tandas en segundo plano para esta sección.';
+  }catch(e){notice.textContent='No pudimos actualizar el estado. Esto no detiene el envío; volveremos a consultar.';}
+  finally{busy=false;timer=setTimeout(()=>{if(!document.hidden)update();},5000);}
+ }
+ window.actualizarCertificados=update;document.addEventListener('visibilitychange',()=>{if(!document.hidden)update();});update();
+})();
+</script>
 </section>
 <?php require __DIR__.'/../../includes/footer.php'; ?>
