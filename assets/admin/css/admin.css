@@ -3717,3 +3717,40 @@ a {
 .alumno-export-fields label{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer;}
 .alumno-export-fields input{width:18px;height:18px;flex-shrink:0;accent-color:#101d30;}
 @media(max-width:760px){.alumno-export-fields{grid-template-columns:1fr;}}
+
+/* Inicio: jerarquía propia, sin alterar las pantallas de gestión. */
+.inicio-page{max-width:1120px;color:var(--admin-text);font-size:16px;line-height:1.5}
+.inicio-heading{margin:0 0 28px}
+.inicio-heading h1{font-size:clamp(28px,3vw,34px);line-height:1.2;letter-spacing:-.035em;margin:0;font-weight:650}
+.inicio-comunicaciones{background:#fff;border:1px solid var(--admin-border);border-radius:18px;padding:24px;margin-bottom:32px}
+.inicio-correo-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.inicio-section-title{display:flex;align-items:center;gap:12px}
+.inicio-section-title svg{width:24px;height:24px;flex-shrink:0}
+.inicio-page h2{font-size:20px;line-height:1.3;letter-spacing:-.02em;margin:0;font-weight:650}
+.inicio-page p{font-size:16px;line-height:1.5;margin:0}
+.inicio-link{display:inline-flex;align-items:center;min-height:44px;font-size:16px;font-weight:600;text-decoration:underline;text-underline-offset:4px;color:var(--admin-text)}
+.inicio-link:hover{color:#23577a}
+.inicio-estado{display:flex;align-items:baseline;gap:10px;padding:8px 0 20px}
+.inicio-status-dot{width:8px;height:8px;background:#34735b;border-radius:50%;flex-shrink:0}
+.inicio-comunicaciones--atencion{border-color:#dcbab4}
+.inicio-comunicaciones--atencion .inicio-status-dot{background:#a43d31}
+.inicio-comunicaciones--atencion .inicio-correo-heading>.inicio-link{color:#923426}
+.inicio-recordatorios{border-top:1px solid var(--admin-border);padding-top:18px}
+.inicio-recordatorios h3{font-size:16px;font-weight:600;margin:0 0 6px}
+.inicio-recordatorios>p,.inicio-recordatorio p{color:#566276}
+.inicio-recordatorio{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 0}
+.inicio-recordatorio+.inicio-recordatorio{border-top:1px solid var(--admin-border)}
+.inicio-recordatorio h4{font-size:16px;line-height:1.5;margin:0 0 4px;font-weight:600}
+.inicio-recordatorio .inicio-link{flex-shrink:0}
+.inicio-recordatorios .inicio-alerta{color:#923426;margin-top:12px}
+.inicio-alerta a{text-decoration:underline;text-underline-offset:3px}
+.inicio-accesos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.inicio-acceso{display:flex;flex-direction:column;gap:22px;border:1px solid var(--admin-border);border-radius:18px;background:#fff;padding:24px;transition:border-color .15s,background .15s}
+.inicio-acceso:hover{background:#f7f9fc;border-color:#8999aa}
+.inicio-acceso-icon{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;background:#edf2f7;color:#183b56}
+.inicio-acceso-icon svg{width:25px;height:25px}
+.inicio-acceso p{color:#566276;margin-top:6px}
+.inicio-page a:focus-visible{outline:3px solid #376d99;outline-offset:4px}
+body:has(.inicio-page) .admin-topbar__identity{display:none}
+@media(max-width:760px){.inicio-accesos{grid-template-columns:1fr}.inicio-acceso{flex-direction:row;align-items:center;gap:16px;padding:20px}.inicio-acceso-icon{flex-shrink:0}.inicio-comunicaciones{padding:20px;margin-bottom:24px}.inicio-recordatorio{align-items:flex-start;flex-direction:column;gap:4px}.inicio-heading{margin-bottom:24px}}
+@media(prefers-reduced-motion:reduce){.inicio-acceso{transition:none}}
