@@ -49,6 +49,15 @@ final class CertificadoCola
         }
         usort($jobs,fn($a,$b)=>$b['creado']<=>$a['creado']);return $jobs;
     }
+    public function estado(array $job):array {
+        $lock=fopen($this->path($job['token']).'.lock','c');
+        if(!$lock)throw new RuntimeException('No se pudo consultar la tanda.');
+        try {
+            $free=flock($lock,LOCK_EX|LOCK_NB);
+            if($free)flock($lock,LOCK_UN);
+            return self::resumen($job)+['activa'=>!$free];
+        }finally{fclose($lock);}
+    }
     public static function resumen(array $job):array {
         $counts=array_fill_keys(['pendiente','procesando','enviado','revision'],0);
         foreach($job['items'] as $item)$counts[$item['estado']]++;
@@ -57,9 +66,9 @@ final class CertificadoCola
     /** Una sola ejecución por tanda, independiente de sesiones y peticiones HTTP.
      * Un intento interrumpido no se repite automáticamente: se concilia o revisa.
      */
-    public function procesar(callable $send,callable $accepted,int $seconds=3600):void {
+    public function procesar(callable $send,callable $accepted,int $seconds=3600,?string $onlyToken=null):void {
         $deadline=microtime(true)+$seconds;
-        foreach(glob($this->dir.'/*.json') as $path){
+        foreach($onlyToken===null?glob($this->dir.'/*.json'):[$this->path($onlyToken)] as $path){
             if(microtime(true)>=$deadline)return;
             $token=basename($path,'.json');$lock=fopen($path.'.lock','c');
             if(!$lock)continue;
@@ -87,7 +96,7 @@ final class CertificadoCola
             }finally{flock($lock,LOCK_UN);fclose($lock);}
         }
     }
-    public function ejecutar(PDO $pdo,int $seconds=3600):void {
+    public function ejecutar(PDO $pdo,int $seconds=3600,?string $onlyToken=null):void {
         $services=['docentes'=>new CertificadoDocenteService($pdo),'participantes'=>new CertificadoService($pdo)];
         $this->procesar(function($job,$id)use($services){
             $svc=$services[$job['destinatarios']];
@@ -96,6 +105,6 @@ final class CertificadoCola
         },function($job,$id)use($services){
             foreach($services[$job['destinatarios']]->participantes($job['edicion']) as $p)if((int)$p['id']===$id)return $p['correo_estado']==='enviado';
             return false;
-        },$seconds);
+        },$seconds,$onlyToken);
     }
 }

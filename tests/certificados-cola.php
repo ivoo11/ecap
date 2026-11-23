@@ -36,6 +36,15 @@ try{
  check($lockedCalls===0,'Un segundo worker no procesa una tanda bloqueada');flock($h,LOCK_UN);fclose($h);
  $q->procesar(fn()=>true,fn()=>false,0);
  check($q->leer($token3)['items'][11]['estado']==='pendiente','El límite de ejecución conserva pendientes');
+ check(!$q->estado($q->leer($token3))['activa'],'La tanda libre permite continuar');
+ $h=fopen($dir.'/'.$token3.'.json.lock','c');flock($h,LOCK_EX);
+ check($q->estado($q->leer($token3))['activa'],'Detecta una ejecución activa sin interrumpirla');
+ flock($h,LOCK_UN);fclose($h);
+ $scoped=str_repeat('f',48);$q->iniciar($scoped,$selection,1);$scopeCalls=[];
+ $q->procesar(function($job,$id)use(&$scopeCalls){$scopeCalls[]=$job['token'];return true;},fn()=>false,3600,$scoped);
+ check($scopeCalls===[$scoped,$scoped,$scoped] && $q->leer($token3)['items'][11]['estado']==='pendiente','Continuar procesa únicamente la tanda elegida');
+ $q->procesar(function(){throw new RuntimeException('No debe reenviar');},fn()=>false,3600,$token);
+ check($q->leer($token)['items'][12]['estado']==='revision','Continuar preserva enviados y casos para revisar');
  try{$q->leer('../otro');throw new RuntimeException('Traversal permitido');}catch(DomainException $e){echo "OK Rechaza rutas inválidas\n";}
  $expired=$selection;$expired['vence']=time()-1;
  try{$q->iniciar(str_repeat('d',48),$expired,1);throw new RuntimeException('Aceptó selección vencida');}catch(DomainException $e){echo "OK Selección vencida rechazada\n";}

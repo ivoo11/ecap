@@ -14,7 +14,7 @@ $error=null;$confirmar=null;$rows=$service->participantes($id);
 header('Cache-Control: no-store');
 if(isset($_GET['estado_lotes'])){
     session_write_close();header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(array_map([CertificadoCola::class,'resumen'],$cola->listado($id,$destinatarios)));exit;
+    echo json_encode(array_map([$cola,'estado'],$cola->listado($id,$destinatarios)));exit;
 }
 if(isset($_GET['pdf'])){
     try{
@@ -32,19 +32,20 @@ if(isset($_GET['pdf'])){
 }
 if($_SERVER['REQUEST_METHOD']==='POST'){
     AdminForm::csrf();$accion=AdminForm::text('accion');
-    if($accion==='iniciar_lote'){
+    if(in_array($accion,['iniciar_lote','continuar_lote'],true)){
         header('Content-Type: application/json; charset=utf-8');
         try {
             if(!function_exists('fastcgi_finish_request') && !function_exists('litespeed_finish_request'))throw new DomainException('El servidor no permite iniciar el envío en segundo plano. Contactá al soporte de ECAP.');
             $token=AdminForm::text('lote');$selection=$_SESSION['certificado_lotes'][$token]??null;
             $existing=$cola->leer($token);
+            if($accion==='continuar_lote' && !$existing)throw new DomainException('No se encontró la tanda. Actualizá la pantalla.');
             if(!$existing && (!$selection || $selection['edicion']!==$id || $selection['destinatarios']!==$destinatarios))throw new DomainException('La selección venció. Volvé a revisarla.');
             if($existing && ($existing['edicion']!==$id || $existing['destinatarios']!==$destinatarios))throw new DomainException('Tanda inválida.');
             $job=$existing?:$cola->iniciar($token,$selection,(int)Auth::id());
             session_write_close();ignore_user_abort(true);set_time_limit(0);
             echo json_encode(['ok'=>true,'lote'=>CertificadoCola::resumen($job)]);
             if(function_exists('fastcgi_finish_request'))fastcgi_finish_request();else litespeed_finish_request();
-            try{$cola->ejecutar($pdo);}catch(Throwable $e){error_log('ECAP certificados cola: '.$e->getMessage());}
+            try{$cola->ejecutar($pdo,3600,$token);}catch(Throwable $e){error_log('ECAP certificados cola: '.$e->getMessage());}
             exit;
         }catch(Throwable $e){http_response_code(422);echo json_encode(['ok'=>false,'mensaje'=>$e instanceof DomainException?$e->getMessage():'No se pudo iniciar la tanda. Volvé a intentar.']);exit;}
     }
@@ -82,7 +83,8 @@ $pageTitle='Certificados';$pageSection='actividades';require __DIR__.'/../../inc
 <?php if(isset($_GET['guardado'])):?><div class="edition-message edition-message--success" role="status">Plantilla guardada. Revisá la vista previa antes de emitir.</div><?php endif;?>
 <?php if(!$finished):?><div class="admin-card"><p>Podés preparar la plantilla ahora. La emisión estará disponible cuando termine la edición.</p></div><?php endif;?>
 <section class="admin-card" id="certificado-tandas"><h2>Progreso de envíos</h2>
-<p>Las tandas confirmadas se guardan y siguen en segundo plano, aunque pases a docentes o cierres esta pantalla. Si el servidor interrumpe el proceso, los pendientes se recuperan en la siguiente ejecución de respaldo.</p>
+<p>Las tandas confirmadas se guardan y siguen en segundo plano, aunque pases a docentes o cierres esta pantalla. Si una tanda queda detenida, podés continuar sus pendientes desde acá. Los casos para revisar se resuelven por separado.</p>
+<form id="certificado-continuar" hidden><?= Csrf::field() ?></form>
 <div id="certificado-tandas-lista"></div><p id="certificado-tandas-estado" role="status" aria-live="polite"></p>
 </section>
 <?php if($confirmar):?>
@@ -132,7 +134,16 @@ document.getElementById('certificado-buscar').addEventListener('input',e=>{rows.
 <script>
 (()=>{
  const nombres=<?= json_encode(array_column(array_map(fn($p)=>['id'=>$p['id'],'nombre'=>trim($p['nombre'].' '.$p['apellido'])],$rows),'nombre','id'),JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
- const list=document.getElementById('certificado-tandas-lista'),notice=document.getElementById('certificado-tandas-estado');let busy=false,timer;
+ const list=document.getElementById('certificado-tandas-lista'),notice=document.getElementById('certificado-tandas-estado');let busy=false,timer;const starting=new Set();
+ async function resume(token,button){
+  if(starting.has(token))return;starting.add(token);button.disabled=true;button.textContent='Iniciando…';
+  const feedback=button.parentElement.querySelector('[data-feedback]');feedback.textContent='';
+  try{const data=new FormData(document.getElementById('certificado-continuar'));data.set('accion','continuar_lote');data.set('lote',token);
+   const response=await fetch(location.href,{method:'POST',body:data});if(response.redirected)throw new Error('Tu sesión venció. Volvé a ingresar.');const result=await response.json();if(!response.ok||!result.ok)throw new Error(result.mensaje||'No se pudo continuar.');
+   feedback.textContent='Continuación solicitada. El progreso se actualiza automáticamente.';
+  }catch(e){feedback.textContent=e.message||'No se pudo continuar. Volvé a intentar.';}
+  finally{starting.delete(token);update();}
+ }
  async function update(){
   if(busy)return;busy=true;clearTimeout(timer);
   try{
@@ -140,9 +151,11 @@ document.getElementById('certificado-buscar').addEventListener('input',e=>{rows.
    const response=await fetch(url,{cache:'no-store'});if(!response.ok||response.redirected)throw new Error();const jobs=await response.json();
    for(const job of jobs){
     let box=document.getElementById('tanda-'+job.token);
-    if(!box){box=document.createElement('div');box.id='tanda-'+job.token;const title=document.createElement('p');title.dataset.resumen='';box.append(title);const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Ver destinatarios';details.append(summary);const ul=document.createElement('ul');details.append(ul);box.append(details);list.append(box);}
+    if(!box){box=document.createElement('div');box.id='tanda-'+job.token;const title=document.createElement('p');title.dataset.resumen='';box.append(title);const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Ver destinatarios';details.append(summary);const ul=document.createElement('ul');details.append(ul);box.append(details);const actions=document.createElement('div');actions.className='certificado-actions';const button=document.createElement('button');button.type='button';button.className='admin-button';button.dataset.continuar='';button.addEventListener('click',()=>resume(job.token,button));actions.append(button);const review=document.createElement('a');review.href='/admin/correos/';review.className='activity-action-secondary';review.dataset.revisar='';review.textContent='Revisar correos';actions.append(review);const feedback=document.createElement('p');feedback.dataset.feedback='';feedback.setAttribute('role','status');actions.append(feedback);box.append(actions);list.append(box);}
     const c=job.conteos,remaining=c.pendiente+c.procesando;
-    box.querySelector('[data-resumen]').textContent=new Date(job.creado*1000).toLocaleString('es-AR')+' · '+c.enviado+' de '+job.total+' enviados · '+remaining+' pendientes · '+c.revision+' para revisar'+(remaining===0?' · Tanda finalizada':'');
+    box.querySelector('[data-resumen]').textContent=new Date(job.creado*1000).toLocaleString('es-AR')+' · '+c.enviado+' de '+job.total+' enviados · '+c.pendiente+' pendientes'+(c.procesando?' · '+c.procesando+(job.activa?' en envío':' por comprobar'):'')+' · '+c.revision+' para revisar'+(remaining===0?(c.revision?' · Envíos terminados con incidencias':' · Tanda completada'):(job.activa?' · En curso':' · Tanda detenida'));
+    const button=box.querySelector('[data-continuar]');button.hidden=remaining===0;button.disabled=job.activa||starting.has(job.token);button.textContent=starting.has(job.token)?'Iniciando…':job.activa?'Envío en curso':c.pendiente?'Continuar pendientes ('+c.pendiente+')':'Comprobar envío interrumpido';
+    box.querySelector('[data-revisar]').hidden=c.revision===0;
     for(const [id,item] of Object.entries(job.items)){
      let line=box.querySelector('[data-item="'+id+'"]');if(!line){line=document.createElement('li');line.dataset.item=id;box.querySelector('ul').append(line);}line.textContent=(nombres[id]||'Destinatario '+id)+' · '+item.mensaje;
      const selected=document.querySelector('[data-envio="'+id+'"] [data-resultado]');
