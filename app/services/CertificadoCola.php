@@ -49,14 +49,25 @@ final class CertificadoCola
         }
         usort($jobs,fn($a,$b)=>$b['creado']<=>$a['creado']);return $jobs;
     }
-    public function estado(array $job):array {
+    public function estado(array $job,array $sentIds=[]):array {
         $lock=fopen($this->path($job['token']).'.lock','c');
         if(!$lock)throw new RuntimeException('No se pudo consultar la tanda.');
         try {
             $free=flock($lock,LOCK_EX|LOCK_NB);
             if($free)flock($lock,LOCK_UN);
-            return self::resumen($job)+['activa'=>!$free];
+            return self::resumenActual($job,$sentIds)+['activa'=>!$free];
         }finally{fclose($lock);}
+    }
+    /** Proyección del estado actual: conserva intacto el resultado histórico de la tanda.
+     * Los IDs deben provenir de correos enviados de la misma edición y tipo.
+     */
+    public static function resumenActual(array $job,array $sentIds):array {
+        foreach($job['items'] as $id=>$item){
+            if($item['estado']==='revision' && isset($sentIds[$id])){
+                $job['items'][$id]=['estado'=>'enviado','mensaje'=>'Correo enviado · resuelto después del intento original'];
+            }
+        }
+        return self::resumen($job);
     }
     public static function resumen(array $job):array {
         $counts=array_fill_keys(['pendiente','procesando','enviado','revision'],0);

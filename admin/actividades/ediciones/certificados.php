@@ -14,7 +14,9 @@ $error=null;$confirmar=null;$rows=$service->participantes($id);
 header('Cache-Control: no-store');
 if(isset($_GET['estado_lotes'])){
     session_write_close();header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(array_map([$cola,'estado'],$cola->listado($id,$destinatarios)));exit;
+    // La consulta de participantes ya está limitada a esta edición y tipo de certificado.
+    $sentIds=[];foreach($rows as $p)if($p['correo_estado']==='enviado')$sentIds[(int)$p['id']]=true;
+    echo json_encode(array_map(fn($job)=>$cola->estado($job,$sentIds),$cola->listado($id,$destinatarios)));exit;
 }
 if(isset($_GET['pdf'])){
     try{

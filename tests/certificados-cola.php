@@ -15,6 +15,12 @@ try{
  check($s['conteos']['enviado']===2 && $s['conteos']['revision']===1,'Continúa después de un fallo y guarda cada resultado');
  $q->procesar(function()use(&$calls){$calls[]=99;return true;},fn()=>false);
  check($calls===[11,12,13],'No reenvía resultados ni fallos automáticamente');
+ $original=$q->leer($token);
+ $current=CertificadoCola::resumenActual($original,[12=>true]);
+ check($current['conteos']['enviado']===3 && $current['conteos']['revision']===0,'El reenvío exitoso resuelve la incidencia en el progreso');
+ check($q->leer($token)===$original,'Consultar progreso conserva el historial original');
+ check(CertificadoCola::resumenActual($original,[])['conteos']['revision']===1,'Sin aceptación confirmada sigue para revisar');
+ check(CertificadoCola::resumenActual($original,[999=>true])['conteos']['revision']===1,'Un envío de otra persona no resuelve la incidencia');
  // Simular la terminación abrupta del worker después de marcar un destinatario.
  $token2=str_repeat('b',48);$q->iniciar($token2,$selection,1);
  if(function_exists('pcntl_fork')){
