@@ -3776,10 +3776,12 @@ body:has(.inicio-page) .admin-topbar__identity{display:none}
 .actividad-name strong{font-size:17px;font-weight:600;line-height:1.45;overflow-wrap:anywhere}
 .actividad-name p{font-size:16px;margin:6px 0 0;color:#566276}
 .actividad-date{font-variant-numeric:tabular-nums;white-space:nowrap}
-.actividad-pill{display:inline-flex;padding:5px 10px;border-radius:100px;background:#eef0f2;color:#4c5664;font-size:16px;line-height:1.4;white-space:nowrap}
-.actividad-pill--proxima{background:#edf2f7;color:#30475e}
-.actividad-pill--en_curso{background:#e8f3ed;color:#246247}
-.actividad-pill--cancelada{background:#f8eded;color:#923e3e}
+.actividad-pill{display:inline-flex;padding:5px 10px;border-radius:100px;background:#e5e7eb;color:#374151;font-size:16px;font-weight:600;line-height:1.4;white-space:nowrap}
+.actividad-pill--proxima{background:#dbeafe;color:#174479}
+.actividad-pill--en_curso{background:#d1fae5;color:#14532d}
+.actividad-pill--finalizada{background:#e5e7eb;color:#374151}
+.actividad-pill--borrador{background:#fef3c7;color:#78350f}
+.actividad-pill--cancelada{background:#fee2e2;color:#991b1b}
 .actividad-state-form select{font:inherit;width:100%;min-height:44px;padding:8px;border:1px solid #d8dee6;border-radius:9px;color:#101d30;background:#fff}
 .actividad-save{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .actividad-save button{font:inherit;min-height:44px;padding:8px;border:1px solid #d8dee6;border-radius:8px;cursor:pointer;background:#fff;color:#101d30}
