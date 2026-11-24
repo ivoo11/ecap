@@ -3754,3 +3754,56 @@ a {
 body:has(.inicio-page) .admin-topbar__identity{display:none}
 @media(max-width:760px){.inicio-accesos{grid-template-columns:1fr}.inicio-acceso{flex-direction:row;align-items:center;gap:16px;padding:20px}.inicio-acceso-icon{flex-shrink:0}.inicio-comunicaciones{padding:20px;margin-bottom:24px}.inicio-recordatorio{align-items:flex-start;flex-direction:column;gap:4px}.inicio-heading{margin-bottom:24px}}
 @media(prefers-reduced-motion:reduce){.inicio-acceso{transition:none}}
+
+/* Actividades: misma base visual que Inicio. */
+.actividades-page{max-width:1120px;font-size:16px;line-height:1.5}
+.actividades-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.actividades-heading h1{font-size:34px;line-height:1.2;letter-spacing:-.035em;margin:0;font-weight:650}
+.actividades-page .admin-button{font-size:16px;min-height:44px}
+.actividades-search{display:flex;align-items:center;gap:10px;max-width:380px;background:#fff;border:1px solid #e1e5eb;border-radius:10px;padding:0 14px;margin-bottom:16px;color:#566276}
+.actividades-search svg{flex-shrink:0}
+.actividades-search input{width:100%;min-width:0;height:48px;border:0;background:transparent;font:inherit;color:#101d30}
+.actividades-search input::placeholder{color:#566276}
+.actividades-filtros{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:22px}
+.actividades-filtros button{font:inherit;min-height:44px;padding:8px 12px;border:0;background:transparent;color:#566276;border-radius:9px;cursor:pointer}
+.actividades-filtros button[aria-pressed=true]{background:#e9edf2;color:#101d30;font-weight:600}
+.actividades-lista{border:1px solid #e1e5eb;border-radius:18px;background:white;overflow:hidden}
+.actividades-lista table{border-collapse:collapse;width:100%;table-layout:fixed}
+.actividades-lista th,.actividades-lista td{padding:20px 14px;text-align:left;vertical-align:middle;border-bottom:1px solid #e1e5eb;font-size:16px}
+.actividades-lista th{font-weight:500;color:#566276;padding-block:14px}
+.actividades-lista th:first-child{width:38%}.actividades-lista th:nth-child(2){width:14%}.actividades-lista th:nth-child(3){width:15%}.actividades-lista th:nth-child(4){width:21%}.actividades-lista th:last-child{width:12%}
+.actividades-lista tr:last-child td{border-bottom:0}
+.actividad-name strong{font-size:17px;font-weight:600;line-height:1.45;overflow-wrap:anywhere}
+.actividad-name p{font-size:16px;margin:6px 0 0;color:#566276}
+.actividad-date{font-variant-numeric:tabular-nums;white-space:nowrap}
+.actividad-pill{display:inline-flex;padding:5px 10px;border-radius:100px;background:#eef0f2;color:#4c5664;font-size:16px;line-height:1.4;white-space:nowrap}
+.actividad-pill--proxima{background:#edf2f7;color:#30475e}
+.actividad-pill--en_curso{background:#e8f3ed;color:#246247}
+.actividad-pill--cancelada{background:#f8eded;color:#923e3e}
+.actividad-state-form select{font:inherit;width:100%;min-height:44px;padding:8px;border:1px solid #d8dee6;border-radius:9px;color:#101d30;background:#fff}
+.actividad-save{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.actividad-save button{font:inherit;min-height:44px;padding:8px;border:1px solid #d8dee6;border-radius:8px;cursor:pointer;background:#fff;color:#101d30}
+.actividad-save button[type=submit]{color:#fff;background:#101d30;border-color:#101d30}
+.actividad-enrollment-label,.actividad-capacidad{color:#566276}
+.actividad-capacidad{display:block;margin-top:6px}
+.actividad-action a{font-size:16px;font-weight:600;text-decoration:underline;text-underline-offset:4px;display:inline-flex;align-items:center;min-height:44px;color:#101d30}
+.actividad-mobile-label{display:none}
+.actividades-feedback{color:#246247;margin:0 0 18px;font-size:16px}
+.actividades-empty{padding:24px;margin:0;color:#566276}
+.actividades-page [hidden]{display:none!important}
+.actividades-page :is(a,button,select,input):focus-visible{outline:3px solid #376d99;outline-offset:3px}
+.actividades-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+body:has(.actividades-page) .admin-topbar__identity{display:none}
+@media(max-width:1100px){
+.actividades-lista table,.actividades-lista tbody{display:block}.actividades-lista thead{display:none}
+.actividades-lista tr{display:grid;grid-template-columns:1fr auto;gap:14px;padding:20px;border-bottom:1px solid #e1e5eb}.actividades-lista tr:last-child{border-bottom:0}
+.actividades-lista td{display:block;width:auto;padding:0;border:0}
+.actividad-name{grid-column:1/-1}.actividad-status{justify-self:end}
+.actividad-enrollment{grid-column:1/-1;border-top:1px solid #e1e5eb!important;padding-top:14px!important;display:flex!important;align-items:center;justify-content:space-between;gap:12px}
+.actividad-state-form{width:100%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.actividad-state-form select{width:auto;max-width:190px}
+.actividad-mobile-label{display:block;color:#566276}
+.actividad-save{width:100%;justify-content:flex-end;margin:0}.actividad-capacidad{width:100%;text-align:right}
+.actividad-action{grid-column:1/-1;justify-self:end}
+}
+@media(max-width:480px){.actividades-heading h1{font-size:28px}.actividades-heading .admin-button{padding:10px 12px}.actividades-lista tr{padding:18px 16px}.actividades-filtros button{padding-inline:10px}}
