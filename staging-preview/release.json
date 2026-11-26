@@ -1,0 +1,10 @@
+{
+  "environment": "preview",
+  "host": "pruebas.ecap.com.ar",
+  "productionDeploy": false,
+  "database": false,
+  "outboundMail": false,
+  "cron": false,
+  "requiresHostingPasswordProtection": true,
+  "stage": "bootstrap"
+}
